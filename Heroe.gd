@@ -4,23 +4,54 @@ extends CharacterBody3D
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
+@onready var camera: Camera3D = get_viewport().get_camera_3d()
+
+
 func _physics_process(delta: float) -> void:
-	var input_dir := Vector3.ZERO
+	var move_dir := Vector3.ZERO
 
-	if Input.is_physical_key_pressed(KEY_W):
-		input_dir.z -= 1.0
-	if Input.is_physical_key_pressed(KEY_S):
-		input_dir.z += 1.0
-	if Input.is_physical_key_pressed(KEY_A):
-		input_dir.x -= 1.0
-	if Input.is_physical_key_pressed(KEY_D):
-		input_dir.x += 1.0
+	if camera != null:
+		var cam_forward := -camera.global_basis.z
+		var cam_right := camera.global_basis.x
 
-	if input_dir != Vector3.ZERO:
-		input_dir = input_dir.normalized()
+		# Ignoramos la inclinación vertical de la cámara.
+		cam_forward.y = 0.0
+		cam_right.y = 0.0
 
-	velocity.x = input_dir.x * move_speed
-	velocity.z = input_dir.z * move_speed
+		cam_forward = cam_forward.normalized()
+		cam_right = cam_right.normalized()
+
+		if Input.is_physical_key_pressed(KEY_W):
+			move_dir += cam_forward
+
+		if Input.is_physical_key_pressed(KEY_S):
+			move_dir -= cam_forward
+
+		if Input.is_physical_key_pressed(KEY_A):
+			move_dir -= cam_right
+
+		if Input.is_physical_key_pressed(KEY_D):
+			move_dir += cam_right
+
+	else:
+		# Movimiento básico de respaldo si no se encuentra la cámara.
+		if Input.is_physical_key_pressed(KEY_W):
+			move_dir.z -= 1.0
+
+		if Input.is_physical_key_pressed(KEY_S):
+			move_dir.z += 1.0
+
+		if Input.is_physical_key_pressed(KEY_A):
+			move_dir.x -= 1.0
+
+		if Input.is_physical_key_pressed(KEY_D):
+			move_dir.x += 1.0
+
+	if move_dir != Vector3.ZERO:
+		move_dir = move_dir.normalized()
+
+	velocity.x = move_dir.x * move_speed
+	velocity.z = move_dir.z * move_speed
 
 	if not is_on_floor():
 		velocity.y -= gravity * delta

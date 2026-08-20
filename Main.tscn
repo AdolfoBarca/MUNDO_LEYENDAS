@@ -13,6 +13,8 @@ size = Vector3(30, 0.2, 30)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hvlbp"]
 
+[sub_resource type="BoxMesh" id="BoxMesh_j115u"]
+
 [node name="Main" type="Node3D" unique_id=1207156844]
 
 [node name="Camara" type="Camera3D" parent="." unique_id=36825780]
@@ -40,3 +42,21 @@ mesh = SubResource("CapsuleMesh_whuy3")
 shape = SubResource("CapsuleShape3D_hvlbp")
 
 [node name="LuzSol" type="DirectionalLight3D" parent="." unique_id=549721095]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=71385152]
+
+[node name="Cubo1" type="MeshInstance3D" parent="." unique_id=2108780822]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.5, 0)
+mesh = SubResource("BoxMesh_j115u")
+
+[node name="Cubo4" type="MeshInstance3D" parent="." unique_id=1030435169]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.5)
+mesh = SubResource("BoxMesh_j115u")
+
+[node name="Cubo3" type="MeshInstance3D" parent="." unique_id=2121614575]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 5)
+mesh = SubResource("BoxMesh_j115u")
+
+[node name="Cubo2" type="MeshInstance3D" parent="." unique_id=1896138555]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 0)
+mesh = SubResource("BoxMesh_j115u")
