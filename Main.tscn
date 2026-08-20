@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ba1n56m0xsuw4" path="res://Heroe.gd" id="1_glv2v"]
 [ext_resource type="Script" uid="uid://cgi425hsbbcrs" path="res://Camara.gd" id="1_uu6xs"]
+[ext_resource type="Script" uid="uid://cpb05hwbxbm77" path="res://EnemigoPrueba.gd" id="3_r0du0"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_j115u"]
 size = Vector2(30, 30)
@@ -13,7 +14,14 @@ size = Vector3(30, 0.2, 30)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hvlbp"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_e5ioe"]
+size = Vector3(1.5, 1.5, 2)
+
 [sub_resource type="BoxMesh" id="BoxMesh_j115u"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_e5ioe"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_whuy3"]
 
 [node name="Main" type="Node3D" unique_id=1207156844]
 
@@ -41,6 +49,12 @@ mesh = SubResource("CapsuleMesh_whuy3")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Heroe" unique_id=413580324]
 shape = SubResource("CapsuleShape3D_hvlbp")
 
+[node name="AreaAtaque" type="Area3D" parent="Heroe" unique_id=617451785]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -1.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Heroe/AreaAtaque" unique_id=2117671541]
+shape = SubResource("BoxShape3D_e5ioe")
+
 [node name="LuzSol" type="DirectionalLight3D" parent="." unique_id=549721095]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=71385152]
@@ -60,3 +74,13 @@ mesh = SubResource("BoxMesh_j115u")
 [node name="Cubo2" type="MeshInstance3D" parent="." unique_id=1896138555]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 0)
 mesh = SubResource("BoxMesh_j115u")
+
+[node name="EnemigoPrueba" type="CharacterBody3D" parent="." unique_id=13959930]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4)
+script = ExtResource("3_r0du0")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EnemigoPrueba" unique_id=401224740]
+mesh = SubResource("CapsuleMesh_e5ioe")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EnemigoPrueba" unique_id=1862080325]
+shape = SubResource("CapsuleShape3D_whuy3")
