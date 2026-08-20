@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://xbq8et6w2orm"]
+
+[ext_resource type="Script" uid="uid://ba1n56m0xsuw4" path="res://Heroe.gd" id="1_glv2v"]
+[ext_resource type="Script" uid="uid://cgi425hsbbcrs" path="res://Camara.gd" id="1_uu6xs"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_j115u"]
+size = Vector2(30, 30)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_j115u"]
+size = Vector3(30, 0.2, 30)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_whuy3"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hvlbp"]
+
+[node name="Main" type="Node3D" unique_id=1207156844]
+
+[node name="Camara" type="Camera3D" parent="." unique_id=36825780]
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 1, 5, 8, 5)
+current = true
+script = ExtResource("1_uu6xs")
+
+[node name="Suelo" type="MeshInstance3D" parent="." unique_id=297645028]
+mesh = SubResource("PlaneMesh_j115u")
+
+[node name="SueloColision" type="StaticBody3D" parent="." unique_id=1959525181]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SueloColision" unique_id=1000998007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = SubResource("BoxShape3D_j115u")
+
+[node name="Heroe" type="CharacterBody3D" parent="." unique_id=1150894039]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+script = ExtResource("1_glv2v")
+
+[node name="Cuerpo" type="MeshInstance3D" parent="Heroe" unique_id=28066470]
+mesh = SubResource("CapsuleMesh_whuy3")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Heroe" unique_id=413580324]
+shape = SubResource("CapsuleShape3D_hvlbp")
+
+[node name="LuzSol" type="DirectionalLight3D" parent="." unique_id=549721095]
