@@ -3,11 +3,94 @@ extends CharacterBody3D
 @export var move_speed: float = 5.0
 @export var attack_cooldown: float = 0.5
 
+@export var color_piel: Color = Color("#C98F65")
+@export var color_camisa: Color = Color("#244A73")
+@export var color_pantalon: Color = Color("#2F3540")
+
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var attack_timer: float = 0.0
 
 @onready var camera: Camera3D = get_viewport().get_camera_3d()
 
+@onready var cabeza: MeshInstance3D = $Cabeza
+@onready var brazo_izquierdo: MeshInstance3D = $BrazoIzquierdo
+@onready var brazo_derecho: MeshInstance3D = $BrazoDerecho
+
+@onready var cuerpo: MeshInstance3D = $Cuerpo
+
+@onready var pierna_izquierda: MeshInstance3D = $PiernaIzquierda
+@onready var pierna_derecha: MeshInstance3D = $PiernaDerecha
+
+
+# =========================================================
+# INICIO
+# =========================================================
+
+func _ready() -> void:
+	# Cargar la apariencia elegida en CrearHeroe
+	color_piel = DatosJugador.color_piel
+	color_camisa = DatosJugador.color_camisa
+	color_pantalon = DatosJugador.color_pantalon
+
+	aplicar_colores_personaje()
+
+	print("==============================")
+	print("HÉROE CARGADO EN EL MAPA")
+	print("Nombre: ", DatosJugador.nombre)
+	print("País: ", DatosJugador.pais)
+	print("==============================")
+
+
+# =========================================================
+# APLICAR APARIENCIA
+# =========================================================
+
+func aplicar_colores_personaje() -> void:
+	aplicar_color_piel()
+	aplicar_color_camisa()
+	aplicar_color_pantalon()
+
+
+func aplicar_color_piel() -> void:
+	var partes_piel = [
+		cabeza,
+		brazo_izquierdo,
+		brazo_derecho
+	]
+
+	for parte in partes_piel:
+		if parte != null:
+			var material = parte.get_surface_override_material(0)
+
+			if material != null:
+				material.albedo_color = color_piel
+
+
+func aplicar_color_camisa() -> void:
+	if cuerpo != null:
+		var material = cuerpo.get_surface_override_material(0)
+
+		if material != null:
+			material.albedo_color = color_camisa
+
+
+func aplicar_color_pantalon() -> void:
+	var piernas = [
+		pierna_izquierda,
+		pierna_derecha
+	]
+
+	for pierna in piernas:
+		if pierna != null:
+			var material = pierna.get_surface_override_material(0)
+
+			if material != null:
+				material.albedo_color = color_pantalon
+
+
+# =========================================================
+# ATAQUE
+# =========================================================
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -26,6 +109,10 @@ func _input(event: InputEvent) -> void:
 							if body.has_method("recibir_dano"):
 								body.recibir_dano(20)
 
+
+# =========================================================
+# MOVIMIENTO
+# =========================================================
 
 func _physics_process(delta: float) -> void:
 	var move_dir := Vector3.ZERO

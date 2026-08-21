@@ -2,7 +2,9 @@
 
 [ext_resource type="Script" uid="uid://ba1n56m0xsuw4" path="res://Heroe.gd" id="1_glv2v"]
 [ext_resource type="Script" uid="uid://cgi425hsbbcrs" path="res://Camara.gd" id="1_uu6xs"]
+[ext_resource type="Material" uid="uid://b4lcoj1mqmhph" path="res://MaterialPiel.tres" id="3_cm0pq"]
 [ext_resource type="Script" uid="uid://cpb05hwbxbm77" path="res://EnemigoPrueba.gd" id="3_r0du0"]
+[ext_resource type="Material" uid="uid://c2y66k080fws6" path="res://MaterialPantalon.tres" id="4_fos0i"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_j115u"]
 size = Vector2(30, 30)
@@ -12,10 +14,19 @@ size = Vector3(30, 0.2, 30)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_whuy3"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r0du0"]
+albedo_color = Color(0.14117648, 0.2901961, 0.4509804, 1)
+
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hvlbp"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_e5ioe"]
 size = Vector3(1.5, 1.5, 2)
+
+[sub_resource type="SphereMesh" id="SphereMesh_j115u"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_excdm"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_a6ayp"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_j115u"]
 
@@ -45,6 +56,7 @@ script = ExtResource("1_glv2v")
 
 [node name="Cuerpo" type="MeshInstance3D" parent="Heroe" unique_id=28066470]
 mesh = SubResource("CapsuleMesh_whuy3")
+surface_material_override/0 = SubResource("StandardMaterial3D_r0du0")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Heroe" unique_id=413580324]
 shape = SubResource("CapsuleShape3D_hvlbp")
@@ -54,6 +66,31 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -1.5)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Heroe/AreaAtaque" unique_id=2117671541]
 shape = SubResource("BoxShape3D_e5ioe")
+
+[node name="Cabeza" type="MeshInstance3D" parent="Heroe" unique_id=1396078685]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
+mesh = SubResource("SphereMesh_j115u")
+surface_material_override/0 = ExtResource("3_cm0pq")
+
+[node name="BrazoIzquierdo" type="MeshInstance3D" parent="Heroe" unique_id=1131689858]
+transform = Transform3D(0.35, 0, 0, 0, 0.7, 0, 0, 0, 0.35, -0.65, 0.45, 0)
+mesh = SubResource("CapsuleMesh_excdm")
+surface_material_override/0 = ExtResource("3_cm0pq")
+
+[node name="BrazoDerecho" type="MeshInstance3D" parent="Heroe" unique_id=1667330928]
+transform = Transform3D(0.35, 0, 0, 0, 0.7, 0, 0, 0, 0.35, 0.65, 0.45, 0)
+mesh = SubResource("CapsuleMesh_excdm")
+surface_material_override/0 = ExtResource("3_cm0pq")
+
+[node name="PiernaIzquierda" type="MeshInstance3D" parent="Heroe" unique_id=1949612755]
+transform = Transform3D(0.4, 0, 0, 0, 0.65, 0, 0, 0, 0.4, -0.27, -0.85, 0)
+mesh = SubResource("CapsuleMesh_a6ayp")
+surface_material_override/0 = ExtResource("4_fos0i")
+
+[node name="PiernaDerecha" type="MeshInstance3D" parent="Heroe" unique_id=1600544128]
+transform = Transform3D(0.4, 0, 0, 0, 0.65, 0, 0, 0, 0.4, 0.27, -0.85, 0)
+mesh = SubResource("CapsuleMesh_a6ayp")
+surface_material_override/0 = ExtResource("4_fos0i")
 
 [node name="LuzSol" type="DirectionalLight3D" parent="." unique_id=549721095]
 

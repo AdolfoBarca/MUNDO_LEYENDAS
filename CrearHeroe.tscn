@@ -1,0 +1,143 @@
+[gd_scene format=3 uid="uid://f5d8unysjcx5"]
+
+[ext_resource type="Script" uid="uid://60bpbbb70yee" path="res://CrearHeroe.gd" id="1_rsx3x"]
+[ext_resource type="Material" uid="uid://b4lcoj1mqmhph" path="res://MaterialPiel.tres" id="3_boq6a"]
+[ext_resource type="Material" uid="uid://c2y66k080fws6" path="res://MaterialPantalon.tres" id="4_bothc"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_pltwe"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aq6nx"]
+albedo_color = Color(0.14117648, 0.2901961, 0.4509804, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_wc6mq"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_wi6xp"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_pf2qk"]
+
+[node name="CrearHeroe" type="Control" unique_id=1897495086]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rsx3x")
+
+[node name="Titulo" type="Label" parent="." unique_id=1998559024]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 40.0
+offset_right = 900.0
+offset_bottom = 100.0
+theme_override_font_sizes/font_size = 32
+text = "CREA TU HÉROE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NombreHeroe" type="LineEdit" parent="." unique_id=188347936]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 130.0
+offset_right = 900.0
+offset_bottom = 180.0
+placeholder_text = "Nombre de tu héroe"
+
+[node name="PaisOrigen" type="OptionButton" parent="." unique_id=343705665]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 200.0
+offset_right = 900.0
+offset_bottom = 250.0
+
+[node name="EtiquetaApariencia" type="Label" parent="." unique_id=1417409665]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 285.0
+offset_right = 600.0
+offset_bottom = 325.0
+theme_override_font_sizes/font_size = 22
+text = "APARIENCIA"
+horizontal_alignment = 1
+
+[node name="ColorPiel" type="OptionButton" parent="." unique_id=764345383]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 340.0
+offset_right = 900.0
+offset_bottom = 390.0
+
+[node name="ColorCamisa" type="OptionButton" parent="." unique_id=1927182958]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 405.0
+offset_right = 900.0
+offset_bottom = 455.0
+
+[node name="ColorPantalon" type="OptionButton" parent="." unique_id=1576133846]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 470.0
+offset_right = 900.0
+offset_bottom = 520.0
+
+[node name="VistaHeroe" type="SubViewportContainer" parent="." unique_id=74061765]
+layout_mode = 0
+offset_left = 600.0
+offset_top = 100.0
+offset_right = 1100.0
+offset_bottom = 600.0
+
+[node name="ViewportHeroe" type="SubViewport" parent="VistaHeroe" unique_id=1911041732]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(500, 500)
+render_target_update_mode = 4
+
+[node name="EscenaHeroe" type="Node3D" parent="VistaHeroe/ViewportHeroe" unique_id=1747216396]
+
+[node name="CamaraHeroe" type="Camera3D" parent="VistaHeroe/ViewportHeroe/EscenaHeroe" unique_id=185980310]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)
+current = true
+
+[node name="HeroePreview" type="Node3D" parent="VistaHeroe/ViewportHeroe/EscenaHeroe" unique_id=932530757]
+
+[node name="Cuerpo" type="MeshInstance3D" parent="VistaHeroe/ViewportHeroe/EscenaHeroe/HeroePreview" unique_id=431435462]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.016, 0)
+mesh = SubResource("CapsuleMesh_pltwe")
+surface_material_override/0 = SubResource("StandardMaterial3D_aq6nx")
+
+[node name="Cabeza" type="MeshInstance3D" parent="VistaHeroe/ViewportHeroe/EscenaHeroe/HeroePreview" unique_id=287136439]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, 0)
+mesh = SubResource("SphereMesh_wc6mq")
+surface_material_override/0 = ExtResource("3_boq6a")
+
+[node name="BrazoIzquierdo" type="MeshInstance3D" parent="VistaHeroe/ViewportHeroe/EscenaHeroe/HeroePreview" unique_id=1292102003]
+transform = Transform3D(0.35, 0, 0, 0, 0.7, 0, 0, 0, 0.35, -0.65, 1.45, 0)
+mesh = SubResource("CapsuleMesh_wi6xp")
+surface_material_override/0 = ExtResource("3_boq6a")
+
+[node name="BrazoDerecho" type="MeshInstance3D" parent="VistaHeroe/ViewportHeroe/EscenaHeroe/HeroePreview" unique_id=1451891663]
+transform = Transform3D(0.35, 0, 0, 0, 0.7, 0, 0, 0, 0.35, 0.65, 1.45, 0)
+mesh = SubResource("CapsuleMesh_wi6xp")
+surface_material_override/0 = ExtResource("3_boq6a")
+
+[node name="PiernaIzquierda" type="MeshInstance3D" parent="VistaHeroe/ViewportHeroe/EscenaHeroe/HeroePreview" unique_id=210261283]
+transform = Transform3D(0.4, 0, 0, 0, 0.65, 0, 0, 0, 0.4, -0.27, 0.14999998, 0)
+mesh = SubResource("CapsuleMesh_pf2qk")
+surface_material_override/0 = ExtResource("4_bothc")
+
+[node name="PiernaDerecha" type="MeshInstance3D" parent="VistaHeroe/ViewportHeroe/EscenaHeroe/HeroePreview" unique_id=1726539044]
+transform = Transform3D(0.4, 0, 0, 0, 0.65, 0, 0, 0, 0.4, 0.27, 0.14999998, 0)
+mesh = SubResource("CapsuleMesh_pf2qk")
+surface_material_override/0 = ExtResource("4_bothc")
+
+[node name="LuzHeroe" type="DirectionalLight3D" parent="VistaHeroe/ViewportHeroe/EscenaHeroe" unique_id=1182269992]
+
+[node name="BotonCrear" type="Button" parent="." unique_id=325769007]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 545.0
+offset_right = 600.0
+offset_bottom = 600.0
+text = "CREAR HÉROE"
