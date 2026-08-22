@@ -7,6 +7,22 @@ extends CharacterBody3D
 @export var color_camisa: Color = Color("#244A73")
 @export var color_pantalon: Color = Color("#2F3540")
 
+
+# =========================================================
+# VIDA DEL HÉROE
+# =========================================================
+
+@export var vida_maxima: int = 100
+@export var regeneracion_por_segundo: int = 2
+@export var espera_para_regenerar: float = 5.0
+
+var vida_actual: int
+var esta_muerto: bool = false
+
+var temporizador_regeneracion: float = 0.0
+var tiempo_desde_ultimo_dano: float = 0.0
+
+
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var attack_timer: float = 0.0
 
@@ -28,27 +44,127 @@ var attack_timer: float = 0.0
 
 @onready var nombre_label: Label3D = $NombreHeroe
 
+@onready var barra_vida: ProgressBar = get_node("../Interfaz/BarraVida")
+@onready var texto_vida: Label = get_node("../Interfaz/TextoVida")
+
 
 # =========================================================
 # INICIO
 # =========================================================
 
 func _ready() -> void:
-	# Cargar la apariencia elegida en CrearHeroe
+	vida_actual = vida_maxima
+	esta_muerto = false
+
+	temporizador_regeneracion = 0.0
+	tiempo_desde_ultimo_dano = espera_para_regenerar
+
 	color_piel = DatosJugador.color_piel
 	color_camisa = DatosJugador.color_camisa
 	color_pantalon = DatosJugador.color_pantalon
 
 	aplicar_colores_personaje()
 
-	# Mostrar el nombre elegido sobre el héroe
 	if nombre_label != null:
 		nombre_label.text = DatosJugador.nombre
+
+	actualizar_interfaz_vida()
 
 	print("==============================")
 	print("HÉROE CARGADO EN EL MAPA")
 	print("Nombre: ", DatosJugador.nombre)
 	print("País: ", DatosJugador.pais)
+	print("Vida: ", vida_actual, "/", vida_maxima)
+	print("==============================")
+
+
+# =========================================================
+# VIDA
+# =========================================================
+
+func recibir_dano(cantidad: int) -> void:
+	if esta_muerto:
+		return
+
+	vida_actual -= cantidad
+
+	if vida_actual < 0:
+		vida_actual = 0
+
+	# Reiniciar la espera de regeneración
+	tiempo_desde_ultimo_dano = 0.0
+	temporizador_regeneracion = 0.0
+
+	actualizar_interfaz_vida()
+
+	print("HÉROE RECIBE ", cantidad, " DE DAÑO")
+	print("VIDA: ", vida_actual, "/", vida_maxima)
+
+	if vida_actual <= 0:
+		morir()
+
+
+func regenerar_vida(delta: float) -> void:
+	if esta_muerto:
+		return
+
+	if vida_actual >= vida_maxima:
+		return
+
+	# Contar cuánto tiempo ha pasado desde el último golpe
+	tiempo_desde_ultimo_dano += delta
+
+	# Todavía no han pasado los segundos necesarios
+	if tiempo_desde_ultimo_dano < espera_para_regenerar:
+		return
+
+	# Después de la espera, regenerar cada segundo
+	temporizador_regeneracion += delta
+
+	if temporizador_regeneracion >= 1.0:
+		vida_actual += regeneracion_por_segundo
+
+		if vida_actual > vida_maxima:
+			vida_actual = vida_maxima
+
+		actualizar_interfaz_vida()
+
+		print(
+			"HÉROE REGENERA ",
+			regeneracion_por_segundo,
+			" DE VIDA. VIDA: ",
+			vida_actual,
+			"/",
+			vida_maxima
+		)
+
+		temporizador_regeneracion = 0.0
+
+
+func actualizar_interfaz_vida() -> void:
+	if barra_vida != null:
+		barra_vida.max_value = vida_maxima
+		barra_vida.value = vida_actual
+
+	if texto_vida != null:
+		texto_vida.text = "%s   %d / %d" % [
+			DatosJugador.nombre,
+			vida_actual,
+			vida_maxima
+		]
+
+
+func morir() -> void:
+	if esta_muerto:
+		return
+
+	esta_muerto = true
+	vida_actual = 0
+
+	actualizar_interfaz_vida()
+
+	print("==============================")
+	print("HÉROE DERROTADO")
 	print("==============================")
 
 
@@ -104,6 +220,9 @@ func aplicar_color_pantalon() -> void:
 # =========================================================
 
 func _input(event: InputEvent) -> void:
+	if esta_muerto:
+		return
+
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			if attack_timer <= 0.0:
@@ -126,6 +245,13 @@ func _input(event: InputEvent) -> void:
 # =========================================================
 
 func _physics_process(delta: float) -> void:
+	if esta_muerto:
+		velocity = Vector3.ZERO
+		move_and_slide()
+		return
+
+	regenerar_vida(delta)
+
 	var move_dir := Vector3.ZERO
 
 	if camera != null:
