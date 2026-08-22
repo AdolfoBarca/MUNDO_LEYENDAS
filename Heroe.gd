@@ -10,6 +10,11 @@ extends CharacterBody3D
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var attack_timer: float = 0.0
 
+
+# =========================================================
+# NODOS
+# =========================================================
+
 @onready var camera: Camera3D = get_viewport().get_camera_3d()
 
 @onready var cabeza: MeshInstance3D = $Cabeza
@@ -20,6 +25,8 @@ var attack_timer: float = 0.0
 
 @onready var pierna_izquierda: MeshInstance3D = $PiernaIzquierda
 @onready var pierna_derecha: MeshInstance3D = $PiernaDerecha
+
+@onready var nombre_label: Label3D = $NombreHeroe
 
 
 # =========================================================
@@ -33,6 +40,10 @@ func _ready() -> void:
 	color_pantalon = DatosJugador.color_pantalon
 
 	aplicar_colores_personaje()
+
+	# Mostrar el nombre elegido sobre el héroe
+	if nombre_label != null:
+		nombre_label.text = DatosJugador.nombre
 
 	print("==============================")
 	print("HÉROE CARGADO EN EL MAPA")
