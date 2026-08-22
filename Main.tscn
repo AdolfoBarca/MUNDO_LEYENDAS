@@ -131,13 +131,31 @@ shape = SubResource("CapsuleShape3D_whuy3")
 
 [node name="BarraVida" type="ProgressBar" parent="Interfaz" unique_id=1104055340]
 offset_left = 30.0
-offset_top = 50.0
+offset_top = 45.0
 offset_right = 280.0
-offset_bottom = 80.0
+offset_bottom = 75.0
 value = 100.0
 
 [node name="TextoVida" type="Label" parent="Interfaz" unique_id=67641736]
 offset_left = 30.0
-offset_top = 25.0
+offset_top = 20.0
 offset_right = 70.0
-offset_bottom = 48.0
+offset_bottom = 43.0
+
+[node name="TextoNivel" type="Label" parent="Interfaz" unique_id=1144389158]
+offset_left = 30.0
+offset_top = 85.0
+offset_right = 70.0
+offset_bottom = 108.0
+
+[node name="TextoExperiencia" type="Label" parent="Interfaz" unique_id=1288179679]
+offset_left = 30.0
+offset_top = 110.0
+offset_right = 70.0
+offset_bottom = 133.0
+
+[node name="BarraExperiencia" type="ProgressBar" parent="Interfaz" unique_id=1966540938]
+offset_left = 30.0
+offset_top = 135.0
+offset_right = 280.0
+offset_bottom = 162.0
