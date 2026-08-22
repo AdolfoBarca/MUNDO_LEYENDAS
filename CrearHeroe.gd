@@ -146,10 +146,10 @@ func aplicar_color_piel(nuevo_color: Color) -> void:
 
 	for parte in partes_piel:
 		if parte != null:
-			var material = parte.get_surface_override_material(0)
+			var material_parte = parte.get_surface_override_material(0)
 
-			if material != null:
-				material.albedo_color = nuevo_color
+			if material_parte != null:
+				material_parte.albedo_color = nuevo_color
 
 
 # =========================================================
@@ -179,10 +179,10 @@ func _on_color_camisa_seleccionado(indice: int) -> void:
 
 func aplicar_color_camisa(nuevo_color: Color) -> void:
 	if cuerpo != null:
-		var material = cuerpo.get_surface_override_material(0)
+		var material_cuerpo = cuerpo.get_surface_override_material(0)
 
-		if material != null:
-			material.albedo_color = nuevo_color
+		if material_cuerpo != null:
+			material_cuerpo.albedo_color = nuevo_color
 
 
 # =========================================================
@@ -218,10 +218,10 @@ func aplicar_color_pantalon(nuevo_color: Color) -> void:
 
 	for pierna in piernas:
 		if pierna != null:
-			var material = pierna.get_surface_override_material(0)
+			var material_pierna = pierna.get_surface_override_material(0)
 
-			if material != null:
-				material.albedo_color = nuevo_color
+			if material_pierna != null:
+				material_pierna.albedo_color = nuevo_color
 
 
 # =========================================================
@@ -256,14 +256,20 @@ func _on_boton_crear_pressed() -> void:
 
 	DatosJugador.nombre = nombre_elegido
 	DatosJugador.pais = pais_elegido
+
 	DatosJugador.color_piel = color_piel_actual
 	DatosJugador.color_camisa = color_camisa_actual
 	DatosJugador.color_pantalon = color_pantalon_actual
+
+	# Asignar región y afinidad según el país elegido
+	DatosJugador.asignar_region_y_afinidad()
 
 	print("==============================")
 	print("HÉROE GUARDADO")
 	print("Nombre: ", DatosJugador.nombre)
 	print("País: ", DatosJugador.pais)
+	print("Región: ", DatosJugador.region)
+	print("Afinidad: ", DatosJugador.afinidad)
 	print("==============================")
 
 	get_tree().change_scene_to_file("res://Main.tscn")
