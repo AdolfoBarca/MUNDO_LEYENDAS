@@ -28,6 +28,15 @@ var tiempo_desde_ultimo_dano: float = 0.0
 
 
 # =========================================================
+# RESPAWN
+# =========================================================
+
+@export var tiempo_respawn: float = 3.0
+
+var posicion_respawn: Vector3
+
+
+# =========================================================
 # NIVEL Y EXPERIENCIA
 # =========================================================
 
@@ -94,6 +103,10 @@ var attack_timer: float = 0.0
 	"../Interfaz/BarraExperiencia"
 )
 
+@onready var texto_derrota: Label = get_node(
+	"../Interfaz/TextoDerrota"
+)
+
 
 # =========================================================
 # INICIO
@@ -107,6 +120,8 @@ func _ready() -> void:
 	temporizador_regeneracion = 0.0
 	tiempo_desde_ultimo_dano = espera_para_regenerar
 
+	posicion_respawn = global_position
+
 	color_piel = DatosJugador.color_piel
 	color_camisa = DatosJugador.color_camisa
 	color_pantalon = DatosJugador.color_pantalon
@@ -115,6 +130,9 @@ func _ready() -> void:
 
 	if nombre_label != null:
 		nombre_label.text = DatosJugador.nombre
+
+	if texto_derrota != null:
+		texto_derrota.visible = false
 
 	actualizar_interfaz()
 
@@ -206,7 +224,7 @@ func regenerar_vida(delta: float) -> void:
 
 
 # =========================================================
-# MUERTE
+# MUERTE Y RESPAWN
 # =========================================================
 
 func morir() -> void:
@@ -217,10 +235,43 @@ func morir() -> void:
 	esta_muerto = true
 	vida_actual = 0
 
+	velocity = Vector3.ZERO
+
 	actualizar_interfaz()
+
+	if texto_derrota != null:
+		texto_derrota.visible = true
 
 	print("==============================")
 	print("HÉROE DERROTADO")
+	print("Reapareciendo en ", tiempo_respawn, " segundos...")
+	print("==============================")
+
+	await get_tree().create_timer(tiempo_respawn).timeout
+
+	respawn()
+
+
+func respawn() -> void:
+
+	global_position = posicion_respawn
+
+	vida_actual = vida_maxima
+	esta_muerto = false
+
+	temporizador_regeneracion = 0.0
+	tiempo_desde_ultimo_dano = espera_para_regenerar
+
+	velocity = Vector3.ZERO
+
+	if texto_derrota != null:
+		texto_derrota.visible = false
+
+	actualizar_interfaz()
+
+	print("==============================")
+	print("HÉROE REAPARECIÓ")
+	print("Vida: ", vida_actual, "/", vida_maxima)
 	print("==============================")
 
 

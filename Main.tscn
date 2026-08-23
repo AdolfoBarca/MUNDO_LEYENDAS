@@ -159,3 +159,9 @@ offset_left = 30.0
 offset_top = 135.0
 offset_right = 280.0
 offset_bottom = 162.0
+
+[node name="TextoDerrota" type="Label" parent="Interfaz" unique_id=1299108511]
+visible = false
+offset_right = 40.0
+offset_bottom = 23.0
+text = "HAS SIDO DERROTADO"
