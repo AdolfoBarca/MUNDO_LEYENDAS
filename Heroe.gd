@@ -33,8 +33,6 @@ var tiempo_desde_ultimo_dano: float = 0.0
 
 @export var tiempo_respawn: float = 3.0
 
-var posicion_respawn: Vector3
-
 
 # =========================================================
 # NIVEL Y EXPERIENCIA
@@ -107,6 +105,10 @@ var attack_timer: float = 0.0
 	"../Interfaz/TextoDerrota"
 )
 
+@onready var punto_respawn: Marker3D = get_node(
+	"../PuntoRespawn"
+)
+
 
 # =========================================================
 # INICIO
@@ -119,8 +121,6 @@ func _ready() -> void:
 
 	temporizador_regeneracion = 0.0
 	tiempo_desde_ultimo_dano = espera_para_regenerar
-
-	posicion_respawn = global_position
 
 	color_piel = DatosJugador.color_piel
 	color_camisa = DatosJugador.color_camisa
@@ -254,7 +254,8 @@ func morir() -> void:
 
 func respawn() -> void:
 
-	global_position = posicion_respawn
+	if punto_respawn != null:
+		global_position = punto_respawn.global_position
 
 	vida_actual = vida_maxima
 	esta_muerto = false
@@ -271,6 +272,7 @@ func respawn() -> void:
 
 	print("==============================")
 	print("HÉROE REAPARECIÓ")
+	print("Posición: ", global_position)
 	print("Vida: ", vida_actual, "/", vida_maxima)
 	print("==============================")
 
