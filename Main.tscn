@@ -5,6 +5,7 @@
 [ext_resource type="Material" uid="uid://b4lcoj1mqmhph" path="res://MaterialPiel.tres" id="3_cm0pq"]
 [ext_resource type="Script" uid="uid://cpb05hwbxbm77" path="res://EnemigoPrueba.gd" id="3_r0du0"]
 [ext_resource type="Material" uid="uid://c2y66k080fws6" path="res://MaterialPantalon.tres" id="4_fos0i"]
+[ext_resource type="Script" uid="uid://cokjaukgd33hs" path="res://SantuarioCheckpoint.gd" id="6_3dxm6"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_j115u"]
 size = Vector2(30, 30)
@@ -33,6 +34,11 @@ size = Vector3(1.5, 1.5, 2)
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_e5ioe"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_whuy3"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_j115u"]
+radius = 1.5
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_j115u"]
 
 [node name="Main" type="Node3D" unique_id=1207156844]
 
@@ -168,3 +174,13 @@ text = "HAS SIDO DERROTADO"
 
 [node name="PuntoRespawn" type="Marker3D" parent="." unique_id=436705828]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1, 0)
+
+[node name="SantuarioCheckpoint" type="Area3D" parent="." unique_id=352840885]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1, 3)
+script = ExtResource("6_3dxm6")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SantuarioCheckpoint" unique_id=567288270]
+shape = SubResource("SphereShape3D_j115u")
+
+[node name="VisualSantuario" type="MeshInstance3D" parent="SantuarioCheckpoint" unique_id=589359712]
+mesh = SubResource("CylinderMesh_j115u")

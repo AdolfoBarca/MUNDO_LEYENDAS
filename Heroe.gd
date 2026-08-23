@@ -22,16 +22,21 @@ extends CharacterBody3D
 
 var vida_actual: int
 var esta_muerto: bool = false
+var en_zona_segura: bool = false
 
 var temporizador_regeneracion: float = 0.0
 var tiempo_desde_ultimo_dano: float = 0.0
 
 
 # =========================================================
-# RESPAWN
+# RESPAWN Y CHECKPOINT
 # =========================================================
 
 @export var tiempo_respawn: float = 3.0
+
+var posicion_respawn_actual: Vector3
+var checkpoint_actual: Vector3
+var checkpoint_activado: bool = false
 
 
 # =========================================================
@@ -118,9 +123,15 @@ func _ready() -> void:
 
 	vida_actual = vida_maxima
 	esta_muerto = false
+	en_zona_segura = false
 
 	temporizador_regeneracion = 0.0
 	tiempo_desde_ultimo_dano = espera_para_regenerar
+
+	if punto_respawn != null:
+		posicion_respawn_actual = punto_respawn.global_position
+	else:
+		posicion_respawn_actual = global_position
 
 	color_piel = DatosJugador.color_piel
 	color_camisa = DatosJugador.color_camisa
@@ -150,7 +161,58 @@ func _ready() -> void:
 	print("Vida: ", vida_actual, "/", vida_maxima)
 	print("Daño: ", dano)
 	print("Defensa: ", defensa)
+	print("Respawn inicial: ", posicion_respawn_actual)
 	print("==============================")
+
+
+# =========================================================
+# ZONA SEGURA
+# =========================================================
+
+func entrar_zona_segura() -> void:
+
+	if en_zona_segura:
+		return
+
+	en_zona_segura = true
+
+	print("================================")
+	print("ZONA SEGURA ACTIVADA")
+	print("El héroe no puede recibir daño.")
+	print("================================")
+
+
+func salir_zona_segura() -> void:
+
+	if not en_zona_segura:
+		return
+
+	en_zona_segura = false
+
+	print("================================")
+	print("ZONA SEGURA DESACTIVADA")
+	print("El héroe vuelve a ser vulnerable.")
+	print("================================")
+
+
+# =========================================================
+# CHECKPOINT
+# =========================================================
+
+func activar_checkpoint(nueva_posicion: Vector3) -> void:
+
+	if checkpoint_activado:
+		if checkpoint_actual.distance_to(nueva_posicion) < 0.01:
+			return
+
+	checkpoint_activado = true
+	checkpoint_actual = nueva_posicion
+	posicion_respawn_actual = nueva_posicion
+
+	print("================================")
+	print("CHECKPOINT ACTIVADO")
+	print("Nuevo punto de respawn: ", posicion_respawn_actual)
+	print("================================")
 
 
 # =========================================================
@@ -160,6 +222,10 @@ func _ready() -> void:
 func recibir_dano(cantidad: int) -> void:
 
 	if esta_muerto:
+		return
+
+	if en_zona_segura:
+		print("ATAQUE BLOQUEADO: HÉROE EN ZONA SEGURA")
 		return
 
 	var dano_final: int = max(cantidad - defensa, 1)
@@ -254,8 +320,7 @@ func morir() -> void:
 
 func respawn() -> void:
 
-	if punto_respawn != null:
-		global_position = punto_respawn.global_position
+	global_position = posicion_respawn_actual
 
 	vida_actual = vida_maxima
 	esta_muerto = false

@@ -26,7 +26,7 @@ var vida_actual: int = vida_maxima
 
 
 # =========================================================
-# ATAQUE DEL ENEMIGO
+# ATAQUE
 # =========================================================
 
 @export var dano: int = 10
@@ -47,6 +47,7 @@ var gravity: float = ProjectSettings.get_setting(
 # =========================================================
 
 func _ready() -> void:
+
 	vida_actual = vida_maxima
 	esta_muerto = false
 
@@ -67,6 +68,7 @@ func _ready() -> void:
 # =========================================================
 
 func _physics_process(delta: float) -> void:
+
 	if esta_muerto:
 		return
 
@@ -80,8 +82,19 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if heroe.get("esta_muerto") == true:
-		velocity.x = 0.0
-		velocity.z = 0.0
+		detener_movimiento()
+		move_and_slide()
+		return
+
+	# El enemigo no persigue ni ataca dentro del santuario
+	if heroe.get("en_zona_segura") == true:
+		detener_movimiento()
+
+		if not is_on_floor():
+			velocity.y -= gravity * delta
+		else:
+			velocity.y = 0.0
+
 		move_and_slide()
 		return
 
@@ -89,34 +102,18 @@ func _physics_process(delta: float) -> void:
 		heroe.global_position
 	)
 
-	# =====================================================
-	# PERSEGUIR AL HÉROE
-	# =====================================================
-
 	if distancia <= distancia_deteccion and distancia > distancia_ataque:
+
 		perseguir_heroe()
 
-	# =====================================================
-	# ATACAR
-	# =====================================================
-
 	elif distancia <= distancia_ataque:
-		velocity.x = 0.0
-		velocity.z = 0.0
 
+		detener_movimiento()
 		atacar_heroe()
 
-	# =====================================================
-	# HÉROE FUERA DEL RANGO
-	# =====================================================
-
 	else:
-		velocity.x = 0.0
-		velocity.z = 0.0
 
-	# =====================================================
-	# GRAVEDAD
-	# =====================================================
+		detener_movimiento()
 
 	if not is_on_floor():
 		velocity.y -= gravity * delta
@@ -127,24 +124,34 @@ func _physics_process(delta: float) -> void:
 
 
 # =========================================================
+# DETENER MOVIMIENTO
+# =========================================================
+
+func detener_movimiento() -> void:
+
+	velocity.x = 0.0
+	velocity.z = 0.0
+
+
+# =========================================================
 # PERSEGUIR
 # =========================================================
 
 func perseguir_heroe() -> void:
+
 	var direccion: Vector3 = (
 		heroe.global_position - global_position
 	)
 
-	# Solo moverlo sobre el suelo
 	direccion.y = 0.0
 
 	if direccion.length() > 0.0:
+
 		direccion = direccion.normalized()
 
 		velocity.x = direccion.x * velocidad
 		velocity.z = direccion.z * velocidad
 
-		# Hacer que el enemigo mire hacia el héroe
 		var objetivo: Vector3 = heroe.global_position
 		objetivo.y = global_position.y
 
@@ -156,6 +163,7 @@ func perseguir_heroe() -> void:
 # =========================================================
 
 func atacar_heroe() -> void:
+
 	if esta_muerto:
 		return
 
@@ -171,7 +179,11 @@ func atacar_heroe() -> void:
 	if heroe.get("esta_muerto") == true:
 		return
 
+	if heroe.get("en_zona_segura") == true:
+		return
+
 	if heroe.has_method("recibir_dano"):
+
 		print("ENEMIGO ATACA AL HÉROE")
 
 		heroe.recibir_dano(dano)
@@ -184,6 +196,7 @@ func atacar_heroe() -> void:
 # =========================================================
 
 func recibir_dano(cantidad: int) -> void:
+
 	if esta_muerto:
 		return
 
@@ -206,6 +219,7 @@ func recibir_dano(cantidad: int) -> void:
 # =========================================================
 
 func morir() -> void:
+
 	if esta_muerto:
 		return
 
@@ -215,8 +229,11 @@ func morir() -> void:
 	print("ENEMIGO DERROTADO")
 
 	if heroe != null:
+
 		if is_instance_valid(heroe):
+
 			if heroe.has_method("recibir_experiencia"):
+
 				heroe.recibir_experiencia(
 					experiencia_otorgada
 				)
