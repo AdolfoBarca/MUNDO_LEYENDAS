@@ -17,17 +17,29 @@ var vida_actual: int = vida_maxima
 
 
 # =========================================================
+# MOVIMIENTO Y DETECCIÓN
+# =========================================================
+
+@export var velocidad: float = 2.5
+@export var distancia_deteccion: float = 8.0
+@export var distancia_ataque: float = 2.0
+
+
+# =========================================================
 # ATAQUE DEL ENEMIGO
 # =========================================================
 
 @export var dano: int = 10
-@export var distancia_ataque: float = 2.0
 @export var tiempo_entre_ataques: float = 1.0
 
 var temporizador_ataque: float = 0.0
 
 var heroe: CharacterBody3D
 var esta_muerto: bool = false
+
+var gravity: float = ProjectSettings.get_setting(
+	"physics/3d/default_gravity"
+)
 
 
 # =========================================================
@@ -68,14 +80,75 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if heroe.get("esta_muerto") == true:
+		velocity.x = 0.0
+		velocity.z = 0.0
+		move_and_slide()
 		return
 
-	var distancia = global_position.distance_to(
+	var distancia: float = global_position.distance_to(
 		heroe.global_position
 	)
 
-	if distancia <= distancia_ataque:
+	# =====================================================
+	# PERSEGUIR AL HÉROE
+	# =====================================================
+
+	if distancia <= distancia_deteccion and distancia > distancia_ataque:
+		perseguir_heroe()
+
+	# =====================================================
+	# ATACAR
+	# =====================================================
+
+	elif distancia <= distancia_ataque:
+		velocity.x = 0.0
+		velocity.z = 0.0
+
 		atacar_heroe()
+
+	# =====================================================
+	# HÉROE FUERA DEL RANGO
+	# =====================================================
+
+	else:
+		velocity.x = 0.0
+		velocity.z = 0.0
+
+	# =====================================================
+	# GRAVEDAD
+	# =====================================================
+
+	if not is_on_floor():
+		velocity.y -= gravity * delta
+	else:
+		velocity.y = 0.0
+
+	move_and_slide()
+
+
+# =========================================================
+# PERSEGUIR
+# =========================================================
+
+func perseguir_heroe() -> void:
+	var direccion: Vector3 = (
+		heroe.global_position - global_position
+	)
+
+	# Solo moverlo sobre el suelo
+	direccion.y = 0.0
+
+	if direccion.length() > 0.0:
+		direccion = direccion.normalized()
+
+		velocity.x = direccion.x * velocidad
+		velocity.z = direccion.z * velocidad
+
+		# Hacer que el enemigo mire hacia el héroe
+		var objetivo: Vector3 = heroe.global_position
+		objetivo.y = global_position.y
+
+		look_at(objetivo, Vector3.UP)
 
 
 # =========================================================
