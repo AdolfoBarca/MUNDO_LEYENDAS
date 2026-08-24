@@ -24,6 +24,10 @@ DatosJugador="*uid://dx8rg4etnq51g"
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[global_group]
+
+heroe=""
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

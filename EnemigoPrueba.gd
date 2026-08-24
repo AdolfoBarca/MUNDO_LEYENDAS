@@ -2,193 +2,332 @@ extends CharacterBody3D
 
 
 # =========================================================
-# VIDA DEL ENEMIGO
+# ESTADÍSTICAS DEL ENEMIGO
 # =========================================================
 
 @export var vida_maxima: int = 100
-var vida_actual: int = vida_maxima
+@export var ataque_base: int = 10
 
-
-# =========================================================
-# EXPERIENCIA
-# =========================================================
-
-@export var experiencia_otorgada: int = 25
-
-
-# =========================================================
-# MOVIMIENTO Y DETECCIÓN
-# =========================================================
-
-@export var velocidad: float = 2.5
-@export var distancia_deteccion: float = 8.0
-@export var distancia_ataque: float = 2.0
-
-
-# =========================================================
-# ATAQUE
-# =========================================================
-
-@export var dano: int = 10
+@export var velocidad_movimiento: float = 2.5
+@export var distancia_deteccion: float = 7.0
+@export var distancia_maxima_persecucion: float = 12.0
+@export var distancia_ataque: float = 1.8
 @export var tiempo_entre_ataques: float = 1.0
 
-var temporizador_ataque: float = 0.0
-
-var heroe: CharacterBody3D
-var esta_muerto: bool = false
-
-var gravity: float = ProjectSettings.get_setting(
-	"physics/3d/default_gravity"
-)
+@export var tiempo_respawn: float = 5.0
 
 
 # =========================================================
-# INICIO
+# VIDA
+# =========================================================
+
+var vida_actual: int
+var esta_muerto: bool = false
+
+
+# =========================================================
+# REFERENCIAS
+# =========================================================
+
+var heroe: CharacterBody3D = null
+
+@onready var vida_label: Label3D = $VidaLabel
+@onready var barra_vida: ProgressBar = $ViewportVida/BarraVida
+
+
+# =========================================================
+# MOVIMIENTO / IA
+# =========================================================
+
+var posicion_inicial: Vector3
+var tiempo_ataque: float = 0.0
+
+
+enum Estado {
+	QUIETO,
+	PERSIGUIENDO,
+	REGRESANDO
+}
+
+var estado_actual: Estado = Estado.QUIETO
+
+
+# =========================================================
+# READY
 # =========================================================
 
 func _ready() -> void:
 
 	vida_actual = vida_maxima
-	esta_muerto = false
+	posicion_inicial = global_position
 
-	heroe = get_tree().root.find_child(
-		"Heroe",
-		true,
-		false
-	)
+	configurar_interfaz_vida()
+	actualizar_interfaz_vida()
 
-	if heroe != null:
-		print("ENEMIGO ENCONTRÓ AL HÉROE")
-	else:
-		print("ENEMIGO NO ENCONTRÓ AL HÉROE")
+	print("ENEMIGO CARGADO")
+	print("POSICIÓN INICIAL:", posicion_inicial)
 
 
 # =========================================================
-# PROCESO
+# CONFIGURAR INTERFAZ DE VIDA
+# =========================================================
+
+func configurar_interfaz_vida() -> void:
+
+	if barra_vida != null:
+		barra_vida.min_value = 0
+		barra_vida.max_value = vida_maxima
+		barra_vida.value = vida_actual
+
+
+# =========================================================
+# ACTUALIZAR VIDA VISUAL
+# =========================================================
+
+func actualizar_interfaz_vida() -> void:
+
+	if vida_label != null:
+		vida_label.text = "%d / %d" % [
+			vida_actual,
+			vida_maxima
+		]
+
+	if barra_vida != null:
+		barra_vida.max_value = vida_maxima
+		barra_vida.value = vida_actual
+
+
+# =========================================================
+# PROCESO PRINCIPAL
 # =========================================================
 
 func _physics_process(delta: float) -> void:
 
 	if esta_muerto:
+		velocity = Vector3.ZERO
 		return
 
-	if temporizador_ataque > 0.0:
-		temporizador_ataque -= delta
+
+	if tiempo_ataque > 0:
+		tiempo_ataque -= delta
+
 
 	if heroe == null:
+		buscar_heroe()
+
+
+	if heroe == null:
+		velocity = Vector3.ZERO
 		return
 
-	if not is_instance_valid(heroe):
-		return
 
-	if heroe.get("esta_muerto") == true:
-		detener_movimiento()
-		move_and_slide()
-		return
-
-	# El enemigo no persigue ni ataca dentro del santuario
-	if heroe.get("en_zona_segura") == true:
-		detener_movimiento()
-
-		if not is_on_floor():
-			velocity.y -= gravity * delta
-		else:
-			velocity.y = 0.0
-
-		move_and_slide()
-		return
-
-	var distancia: float = global_position.distance_to(
+	var distancia_heroe: float = global_position.distance_to(
 		heroe.global_position
 	)
 
-	if distancia <= distancia_deteccion and distancia > distancia_ataque:
 
-		perseguir_heroe()
+	var distancia_origen: float = global_position.distance_to(
+		posicion_inicial
+	)
 
-	elif distancia <= distancia_ataque:
 
-		detener_movimiento()
-		atacar_heroe()
+	match estado_actual:
 
-	else:
 
-		detener_movimiento()
+		# =================================================
+		# QUIETO
+		# =================================================
 
-	if not is_on_floor():
-		velocity.y -= gravity * delta
-	else:
-		velocity.y = 0.0
+		Estado.QUIETO:
+
+			velocity = Vector3.ZERO
+
+			if distancia_heroe <= distancia_deteccion:
+
+				estado_actual = Estado.PERSIGUIENDO
+
+				print("ENEMIGO DETECTÓ AL HÉROE")
+
+
+		# =================================================
+		# PERSIGUIENDO
+		# =================================================
+
+		Estado.PERSIGUIENDO:
+
+			if heroe.has_method("esta_en_zona_segura"):
+
+				if heroe.esta_en_zona_segura():
+
+					estado_actual = Estado.REGRESANDO
+					velocity = Vector3.ZERO
+
+					print("HÉROE EN ZONA SEGURA")
+					print("ENEMIGO REGRESA A SU ZONA")
+
+					return
+
+
+			if distancia_origen >= distancia_maxima_persecucion:
+
+				estado_actual = Estado.REGRESANDO
+				velocity = Vector3.ZERO
+
+				print("ENEMIGO REGRESA A SU ZONA")
+
+				return
+
+
+			if distancia_heroe > distancia_ataque:
+
+				mover_hacia_heroe()
+
+			else:
+
+				velocity = Vector3.ZERO
+				atacar_heroe()
+
+
+		# =================================================
+		# REGRESANDO
+		# =================================================
+
+		Estado.REGRESANDO:
+
+			var distancia_a_inicio: float = global_position.distance_to(
+				posicion_inicial
+			)
+
+			if distancia_a_inicio <= 0.3:
+
+				global_position = posicion_inicial
+				velocity = Vector3.ZERO
+				estado_actual = Estado.QUIETO
+
+				print("ENEMIGO VOLVIÓ A SU POSICIÓN")
+
+			else:
+
+				mover_hacia_posicion(posicion_inicial)
+
 
 	move_and_slide()
 
 
 # =========================================================
-# DETENER MOVIMIENTO
+# BUSCAR HÉROE
 # =========================================================
 
-func detener_movimiento() -> void:
+func buscar_heroe() -> void:
 
-	velocity.x = 0.0
-	velocity.z = 0.0
+	var posibles_heroes = get_tree().get_nodes_in_group("heroe")
+
+	if posibles_heroes.size() > 0:
+
+		heroe = posibles_heroes[0] as CharacterBody3D
 
 
 # =========================================================
-# PERSEGUIR
+# MOVER HACIA HÉROE
 # =========================================================
 
-func perseguir_heroe() -> void:
+func mover_hacia_heroe() -> void:
+
+	if heroe == null:
+		return
+
 
 	var direccion: Vector3 = (
 		heroe.global_position - global_position
 	)
 
-	direccion.y = 0.0
+	direccion.y = 0
 
-	if direccion.length() > 0.0:
 
-		direccion = direccion.normalized()
+	if direccion.length() <= 0.001:
 
-		velocity.x = direccion.x * velocidad
-		velocity.z = direccion.z * velocidad
+		velocity = Vector3.ZERO
+		return
 
-		var objetivo: Vector3 = heroe.global_position
-		objetivo.y = global_position.y
 
-		look_at(objetivo, Vector3.UP)
+	direccion = direccion.normalized()
+
+
+	velocity.x = direccion.x * velocidad_movimiento
+	velocity.z = direccion.z * velocidad_movimiento
+
+
+	look_at(
+		Vector3(
+			heroe.global_position.x,
+			global_position.y,
+			heroe.global_position.z
+		),
+		Vector3.UP
+	)
 
 
 # =========================================================
-# ATAQUE
+# MOVER HACIA POSICIÓN
+# =========================================================
+
+func mover_hacia_posicion(destino: Vector3) -> void:
+
+	var direccion: Vector3 = destino - global_position
+
+	direccion.y = 0
+
+
+	if direccion.length() <= 0.001:
+
+		velocity = Vector3.ZERO
+		return
+
+
+	direccion = direccion.normalized()
+
+
+	velocity.x = direccion.x * velocidad_movimiento
+	velocity.z = direccion.z * velocidad_movimiento
+
+
+# =========================================================
+# ATAQUE DEL ENEMIGO
 # =========================================================
 
 func atacar_heroe() -> void:
 
-	if esta_muerto:
+	if tiempo_ataque > 0:
 		return
 
-	if temporizador_ataque > 0.0:
-		return
 
 	if heroe == null:
 		return
 
-	if not is_instance_valid(heroe):
+
+	if not heroe.has_method("recibir_dano"):
 		return
 
-	if heroe.get("esta_muerto") == true:
-		return
 
-	if heroe.get("en_zona_segura") == true:
-		return
+	if heroe.has_method("esta_en_zona_segura"):
 
-	if heroe.has_method("recibir_dano"):
+		if heroe.esta_en_zona_segura():
 
-		print("ENEMIGO ATACA AL HÉROE")
+			print("ATAQUE BLOQUEADO: HÉROE EN ZONA SEGURA")
 
-		heroe.recibir_dano(dano)
+			estado_actual = Estado.REGRESANDO
 
-		temporizador_ataque = tiempo_entre_ataques
+			return
+
+
+	print("ENEMIGO ATACA AL HÉROE")
+	print("ATAQUE ENEMIGO:", ataque_base)
+
+
+	heroe.recibir_dano(ataque_base)
+
+
+	tiempo_ataque = tiempo_entre_ataques
 
 
 # =========================================================
@@ -200,22 +339,34 @@ func recibir_dano(cantidad: int) -> void:
 	if esta_muerto:
 		return
 
+
 	vida_actual -= cantidad
+
 
 	if vida_actual < 0:
 		vida_actual = 0
 
+
+	actualizar_interfaz_vida()
+
+
 	print(
-		"ENEMIGO RECIBE %d DE DANO. VIDA: %d"
-		% [cantidad, vida_actual]
+		"ENEMIGO RECIBE %d DE DAÑO. VIDA: %d/%d"
+		% [
+			cantidad,
+			vida_actual,
+			vida_maxima
+		]
 	)
 
+
 	if vida_actual <= 0:
+
 		morir()
 
 
 # =========================================================
-# MUERTE
+# MUERTE DEL ENEMIGO
 # =========================================================
 
 func morir() -> void:
@@ -223,19 +374,73 @@ func morir() -> void:
 	if esta_muerto:
 		return
 
+
 	esta_muerto = true
-	vida_actual = 0
+
+	velocity = Vector3.ZERO
+
 
 	print("ENEMIGO DERROTADO")
 
+
 	if heroe != null:
 
-		if is_instance_valid(heroe):
+		if heroe.has_method("ganar_experiencia"):
 
-			if heroe.has_method("recibir_experiencia"):
+			heroe.ganar_experiencia(100)
 
-				heroe.recibir_experiencia(
-					experiencia_otorgada
-				)
 
-	queue_free()
+	print(
+		"ENEMIGO REAPARECERÁ EN %.1f SEGUNDOS"
+		% tiempo_respawn
+	)
+
+
+	# Ocultar todo el enemigo
+	visible = false
+
+
+	# Desactivar colisiones
+	set_collision_layer_value(1, false)
+	set_collision_mask_value(1, false)
+
+
+	# Esperar
+	await get_tree().create_timer(tiempo_respawn).timeout
+
+
+	reaparecer()
+
+
+# =========================================================
+# REAPARECER
+# =========================================================
+
+func reaparecer() -> void:
+
+	global_position = posicion_inicial
+
+	vida_actual = vida_maxima
+	tiempo_ataque = 0.0
+
+	estado_actual = Estado.QUIETO
+	esta_muerto = false
+
+
+	actualizar_interfaz_vida()
+
+
+	# Mostrar nuevamente
+	visible = true
+
+
+	# Reactivar colisiones
+	set_collision_layer_value(1, true)
+	set_collision_mask_value(1, true)
+
+
+	print("==============================")
+	print("ENEMIGO REAPARECIÓ")
+	print("VIDA: %d/%d" % [vida_actual, vida_maxima])
+	print("POSICIÓN:", global_position)
+	print("==============================")

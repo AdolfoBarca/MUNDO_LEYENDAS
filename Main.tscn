@@ -35,6 +35,9 @@ size = Vector3(1.5, 1.5, 2)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_whuy3"]
 
+[sub_resource type="ViewportTexture" id="ViewportTexture_3dxm6"]
+viewport_path = NodePath("EnemigoPrueba/ViewportVida")
+
 [sub_resource type="SphereShape3D" id="SphereShape3D_j115u"]
 radius = 1.5
 
@@ -56,7 +59,7 @@ mesh = SubResource("PlaneMesh_j115u")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 shape = SubResource("BoxShape3D_j115u")
 
-[node name="Heroe" type="CharacterBody3D" parent="." unique_id=1150894039]
+[node name="Heroe" type="CharacterBody3D" parent="." unique_id=1150894039 groups=["heroe"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 script = ExtResource("1_glv2v")
 
@@ -132,6 +135,28 @@ mesh = SubResource("CapsuleMesh_e5ioe")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="EnemigoPrueba" unique_id=1862080325]
 shape = SubResource("CapsuleShape3D_whuy3")
+
+[node name="VidaLabel" type="Label3D" parent="EnemigoPrueba" unique_id=479377998]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+billboard = 1
+text = "100 / 100"
+
+[node name="ViewportVida" type="SubViewport" parent="EnemigoPrueba" unique_id=1899773443]
+size = Vector2i(180, 24)
+
+[node name="BarraVida" type="ProgressBar" parent="EnemigoPrueba/ViewportVida" unique_id=235704573]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 100.0
+
+[node name="BarraVida3D" type="Sprite3D" parent="EnemigoPrueba" unique_id=879913633]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.005
+billboard = 1
+texture = SubResource("ViewportTexture_3dxm6")
 
 [node name="Interfaz" type="CanvasLayer" parent="." unique_id=887633685]
 
