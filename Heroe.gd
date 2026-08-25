@@ -195,6 +195,10 @@ func salir_zona_segura() -> void:
 	print("================================")
 
 
+func esta_en_zona_segura() -> bool:
+	return en_zona_segura
+
+
 # =========================================================
 # CHECKPOINT
 # =========================================================
@@ -368,6 +372,10 @@ func recibir_experiencia(cantidad: int) -> void:
 	actualizar_interfaz()
 
 
+func ganar_experiencia(cantidad: int) -> void:
+	recibir_experiencia(cantidad)
+
+
 func comprobar_subida_nivel() -> void:
 
 	while experiencia_actual >= experiencia_para_siguiente_nivel:
@@ -525,16 +533,41 @@ func _input(event: InputEvent) -> void:
 					"AreaAtaque"
 				)
 
-				if area_ataque != null:
+				if area_ataque == null:
+					return
 
-					for body in area_ataque.get_overlapping_bodies():
+				var enemigo_mas_cercano: Node3D = null
+				var distancia_mas_cercana: float = INF
 
-						if body.name == "EnemigoPrueba":
+				for body in area_ataque.get_overlapping_bodies():
 
-							print("GOLPE A ENEMIGO")
+					if body == self:
+						continue
 
-							if body.has_method("recibir_dano"):
-								body.recibir_dano(dano)
+					if not body.has_method("recibir_dano"):
+						continue
+
+					if not body is Node3D:
+						continue
+
+					var distancia: float = global_position.distance_to(
+						body.global_position
+					)
+
+					if distancia < distancia_mas_cercana:
+
+						distancia_mas_cercana = distancia
+						enemigo_mas_cercano = body
+
+
+				if enemigo_mas_cercano != null:
+
+					print(
+						"GOLPE A ENEMIGO: ",
+						enemigo_mas_cercano.name
+					)
+
+					enemigo_mas_cercano.recibir_dano(dano)
 
 
 # =========================================================

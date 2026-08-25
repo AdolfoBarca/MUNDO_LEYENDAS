@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://cpb05hwbxbm77" path="res://EnemigoPrueba.gd" id="3_r0du0"]
 [ext_resource type="Material" uid="uid://c2y66k080fws6" path="res://MaterialPantalon.tres" id="4_fos0i"]
 [ext_resource type="Script" uid="uid://cokjaukgd33hs" path="res://SantuarioCheckpoint.gd" id="6_3dxm6"]
+[ext_resource type="Script" uid="uid://b0khvsy334yjx" path="res://HUDInventario.gd" id="7_lgr22"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_j115u"]
 size = Vector2(30, 30)
@@ -31,17 +32,23 @@ size = Vector3(1.5, 1.5, 2)
 
 [sub_resource type="BoxMesh" id="BoxMesh_j115u"]
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_e5ioe"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_whuy3"]
-
-[sub_resource type="ViewportTexture" id="ViewportTexture_3dxm6"]
-viewport_path = NodePath("EnemigoPrueba/ViewportVida")
-
 [sub_resource type="SphereShape3D" id="SphereShape3D_j115u"]
 radius = 1.5
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_j115u"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_e5ioe"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_whuy3"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_5vvyt"]
+viewport_path = NodePath("ZonaEnemigos/EnemigoPrueba/ViewportVida")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_20pc6"]
+viewport_path = NodePath("ZonaEnemigos/Enemigo3/ViewportVida")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_wkp8b"]
+viewport_path = NodePath("ZonaEnemigos/Enemigo2/ViewportVida")
 
 [node name="Main" type="Node3D" unique_id=1207156844]
 
@@ -126,38 +133,6 @@ mesh = SubResource("BoxMesh_j115u")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 0)
 mesh = SubResource("BoxMesh_j115u")
 
-[node name="EnemigoPrueba" type="CharacterBody3D" parent="." unique_id=13959930]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4)
-script = ExtResource("3_r0du0")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="EnemigoPrueba" unique_id=401224740]
-mesh = SubResource("CapsuleMesh_e5ioe")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="EnemigoPrueba" unique_id=1862080325]
-shape = SubResource("CapsuleShape3D_whuy3")
-
-[node name="VidaLabel" type="Label3D" parent="EnemigoPrueba" unique_id=479377998]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
-billboard = 1
-text = "100 / 100"
-
-[node name="ViewportVida" type="SubViewport" parent="EnemigoPrueba" unique_id=1899773443]
-size = Vector2i(180, 24)
-
-[node name="BarraVida" type="ProgressBar" parent="EnemigoPrueba/ViewportVida" unique_id=235704573]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-value = 100.0
-
-[node name="BarraVida3D" type="Sprite3D" parent="EnemigoPrueba" unique_id=879913633]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
-pixel_size = 0.005
-billboard = 1
-texture = SubResource("ViewportTexture_3dxm6")
-
 [node name="Interfaz" type="CanvasLayer" parent="." unique_id=887633685]
 
 [node name="BarraVida" type="ProgressBar" parent="Interfaz" unique_id=1104055340]
@@ -209,3 +184,131 @@ shape = SubResource("SphereShape3D_j115u")
 
 [node name="VisualSantuario" type="MeshInstance3D" parent="SantuarioCheckpoint" unique_id=589359712]
 mesh = SubResource("CylinderMesh_j115u")
+
+[node name="ZonaEnemigos" type="Node3D" parent="." unique_id=1716457963]
+
+[node name="EnemigoPrueba" type="CharacterBody3D" parent="ZonaEnemigos" unique_id=13959930]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4)
+script = ExtResource("3_r0du0")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=401224740]
+mesh = SubResource("CapsuleMesh_e5ioe")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=1862080325]
+shape = SubResource("CapsuleShape3D_whuy3")
+
+[node name="VidaLabel" type="Label3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=479377998]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+billboard = 1
+text = "100 / 100"
+
+[node name="ViewportVida" type="SubViewport" parent="ZonaEnemigos/EnemigoPrueba" unique_id=1899773443]
+size = Vector2i(180, 24)
+
+[node name="BarraVida" type="ProgressBar" parent="ZonaEnemigos/EnemigoPrueba/ViewportVida" unique_id=235704573]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 100.0
+
+[node name="BarraVida3D" type="Sprite3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=879913633]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.005
+billboard = 1
+texture = SubResource("ViewportTexture_5vvyt")
+
+[node name="Enemigo3" type="CharacterBody3D" parent="ZonaEnemigos" unique_id=1000143047]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1, -6)
+script = ExtResource("3_r0du0")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ZonaEnemigos/Enemigo3" unique_id=2084863696]
+mesh = SubResource("CapsuleMesh_e5ioe")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZonaEnemigos/Enemigo3" unique_id=1356225353]
+shape = SubResource("CapsuleShape3D_whuy3")
+
+[node name="VidaLabel" type="Label3D" parent="ZonaEnemigos/Enemigo3" unique_id=1279166613]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+billboard = 1
+text = "100 / 100"
+
+[node name="ViewportVida" type="SubViewport" parent="ZonaEnemigos/Enemigo3" unique_id=1968342870]
+size = Vector2i(180, 24)
+
+[node name="BarraVida" type="ProgressBar" parent="ZonaEnemigos/Enemigo3/ViewportVida" unique_id=991363237]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 100.0
+
+[node name="BarraVida3D" type="Sprite3D" parent="ZonaEnemigos/Enemigo3" unique_id=240941075]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.005
+billboard = 1
+texture = SubResource("ViewportTexture_20pc6")
+
+[node name="Enemigo2" type="CharacterBody3D" parent="ZonaEnemigos" unique_id=1396595369]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1, -6)
+script = ExtResource("3_r0du0")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ZonaEnemigos/Enemigo2" unique_id=1200525093]
+mesh = SubResource("CapsuleMesh_e5ioe")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZonaEnemigos/Enemigo2" unique_id=424109286]
+shape = SubResource("CapsuleShape3D_whuy3")
+
+[node name="VidaLabel" type="Label3D" parent="ZonaEnemigos/Enemigo2" unique_id=1584550997]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+billboard = 1
+text = "100 / 100"
+
+[node name="ViewportVida" type="SubViewport" parent="ZonaEnemigos/Enemigo2" unique_id=651138006]
+size = Vector2i(180, 24)
+
+[node name="BarraVida" type="ProgressBar" parent="ZonaEnemigos/Enemigo2/ViewportVida" unique_id=1376550176]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 100.0
+
+[node name="BarraVida3D" type="Sprite3D" parent="ZonaEnemigos/Enemigo2" unique_id=1514448802]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.005
+billboard = 1
+texture = SubResource("ViewportTexture_wkp8b")
+
+[node name="HUDInventario" type="CanvasLayer" parent="." unique_id=1950438635]
+script = ExtResource("7_lgr22")
+
+[node name="PanelInventario" type="Panel" parent="HUDInventario" unique_id=824539865]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -352.0
+offset_top = 20.0
+offset_right = -92.0
+offset_bottom = 140.0
+grow_horizontal = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="TituloInventario" type="Label" parent="HUDInventario/PanelInventario" unique_id=254413944]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 10.0
+offset_right = 112.0
+offset_bottom = 33.0
+text = "INVENTARIO"
+
+[node name="FragmentosLabel" type="Label" parent="HUDInventario/PanelInventario" unique_id=1204858755]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 45.0
+offset_right = 211.0
+offset_bottom = 68.0
+text = "Fragmentos de esencia: 0"
