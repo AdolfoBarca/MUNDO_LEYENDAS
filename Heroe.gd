@@ -1,6 +1,5 @@
 extends CharacterBody3D
 
-
 # =========================================================
 # MOVIMIENTO Y ATAQUE
 # =========================================================
@@ -78,41 +77,19 @@ var attack_timer: float = 0.0
 @onready var cabeza: MeshInstance3D = $Cabeza
 @onready var brazo_izquierdo: MeshInstance3D = $BrazoIzquierdo
 @onready var brazo_derecho: MeshInstance3D = $BrazoDerecho
-
 @onready var cuerpo: MeshInstance3D = $Cuerpo
-
 @onready var pierna_izquierda: MeshInstance3D = $PiernaIzquierda
 @onready var pierna_derecha: MeshInstance3D = $PiernaDerecha
 
 @onready var nombre_label: Label3D = $NombreHeroe
 
-@onready var barra_vida: ProgressBar = get_node(
-	"../Interfaz/BarraVida"
-)
-
-@onready var texto_vida: Label = get_node(
-	"../Interfaz/TextoVida"
-)
-
-@onready var texto_nivel: Label = get_node(
-	"../Interfaz/TextoNivel"
-)
-
-@onready var texto_experiencia: Label = get_node(
-	"../Interfaz/TextoExperiencia"
-)
-
-@onready var barra_experiencia: ProgressBar = get_node(
-	"../Interfaz/BarraExperiencia"
-)
-
-@onready var texto_derrota: Label = get_node(
-	"../Interfaz/TextoDerrota"
-)
-
-@onready var punto_respawn: Marker3D = get_node(
-	"../PuntoRespawn"
-)
+@onready var barra_vida: ProgressBar = get_node("../Interfaz/BarraVida")
+@onready var texto_vida: Label = get_node("../Interfaz/TextoVida")
+@onready var texto_nivel: Label = get_node("../Interfaz/TextoNivel")
+@onready var texto_experiencia: Label = get_node("../Interfaz/TextoExperiencia")
+@onready var barra_experiencia: ProgressBar = get_node("../Interfaz/BarraExperiencia")
+@onready var texto_derrota: Label = get_node("../Interfaz/TextoDerrota")
+@onready var punto_respawn: Marker3D = get_node("../PuntoRespawn")
 
 
 # =========================================================
@@ -152,12 +129,7 @@ func _ready() -> void:
 	print("Nombre: ", DatosJugador.nombre)
 	print("País: ", DatosJugador.pais)
 	print("Nivel: ", nivel)
-	print(
-		"Experiencia: ",
-		experiencia_actual,
-		"/",
-		experiencia_para_siguiente_nivel
-	)
+	print("Experiencia: ", experiencia_actual, "/", experiencia_para_siguiente_nivel)
 	print("Vida: ", vida_actual, "/", vida_maxima)
 	print("Daño: ", dano)
 	print("Defensa: ", defensa)
@@ -229,7 +201,6 @@ func recibir_dano(cantidad: int) -> void:
 		return
 
 	if en_zona_segura:
-		print("ATAQUE BLOQUEADO: HÉROE EN ZONA SEGURA")
 		return
 
 	var dano_final: int = max(cantidad - defensa, 1)
@@ -243,11 +214,6 @@ func recibir_dano(cantidad: int) -> void:
 	temporizador_regeneracion = 0.0
 
 	actualizar_interfaz()
-
-	print("ATAQUE ENEMIGO: ", cantidad)
-	print("DEFENSA DEL HÉROE: ", defensa)
-	print("HÉROE RECIBE ", dano_final, " DE DAÑO")
-	print("VIDA: ", vida_actual, "/", vida_maxima)
 
 	if vida_actual <= 0:
 		morir()
@@ -280,15 +246,6 @@ func regenerar_vida(delta: float) -> void:
 			vida_actual = vida_maxima
 
 		actualizar_interfaz()
-
-		print(
-			"HÉROE REGENERA ",
-			regeneracion_por_segundo,
-			" DE VIDA. VIDA: ",
-			vida_actual,
-			"/",
-			vida_maxima
-		)
 
 		temporizador_regeneracion = 0.0
 
@@ -359,12 +316,7 @@ func recibir_experiencia(cantidad: int) -> void:
 
 	print("==============================")
 	print("+", cantidad, " XP")
-	print(
-		"EXPERIENCIA: ",
-		experiencia_actual,
-		"/",
-		experiencia_para_siguiente_nivel
-	)
+	print("EXPERIENCIA: ", experiencia_actual, "/", experiencia_para_siguiente_nivel)
 	print("==============================")
 
 	comprobar_subida_nivel()
@@ -410,13 +362,7 @@ func subir_nivel() -> void:
 	print("VIDA MÁXIMA: ", vida_maxima)
 	print("DAÑO: ", dano)
 	print("DEFENSA: ", defensa)
-	print(
-		"SIGUIENTE NIVEL: ",
-		experiencia_actual,
-		"/",
-		experiencia_para_siguiente_nivel,
-		" XP"
-	)
+	print("SIGUIENTE NIVEL: ", experiencia_actual, "/", experiencia_para_siguiente_nivel, " XP")
 	print("================================")
 	print("")
 
@@ -525,13 +471,9 @@ func _input(event: InputEvent) -> void:
 
 			if attack_timer <= 0.0:
 
-				print("ATAQUE")
-
 				attack_timer = attack_cooldown
 
-				var area_ataque: Area3D = get_node_or_null(
-					"AreaAtaque"
-				)
+				var area_ataque: Area3D = get_node_or_null("AreaAtaque")
 
 				if area_ataque == null:
 					return
@@ -550,23 +492,13 @@ func _input(event: InputEvent) -> void:
 					if not body is Node3D:
 						continue
 
-					var distancia: float = global_position.distance_to(
-						body.global_position
-					)
+					var distancia: float = global_position.distance_to(body.global_position)
 
 					if distancia < distancia_mas_cercana:
-
 						distancia_mas_cercana = distancia
 						enemigo_mas_cercano = body
 
-
 				if enemigo_mas_cercano != null:
-
-					print(
-						"GOLPE A ENEMIGO: ",
-						enemigo_mas_cercano.name
-					)
-
 					enemigo_mas_cercano.recibir_dano(dano)
 
 
@@ -577,10 +509,8 @@ func _input(event: InputEvent) -> void:
 func _physics_process(delta: float) -> void:
 
 	if esta_muerto:
-
 		velocity = Vector3.ZERO
 		move_and_slide()
-
 		return
 
 	regenerar_vida(delta)

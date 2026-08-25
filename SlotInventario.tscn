@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://br3vscyqu7vln"]
+
+[ext_resource type="Script" uid="uid://dgegv14c88d07" path="res://SlotInventario.gd" id="1_hfmuw"]
+
+[node name="SlotInventario" type="Panel" unique_id=409015173]
+custom_minimum_size = Vector2(110, 135)
+offset_right = 110.0
+offset_bottom = 135.0
+script = ExtResource("1_hfmuw")
+
+[node name="NombreObjeto" type="Label" parent="." unique_id=576580199]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 0
+offset_left = 5.0
+offset_top = 55.0
+offset_right = 105.0
+offset_bottom = 105.0
+text = "Objeto"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="CantidadObjeto" type="Label" parent="." unique_id=1292615119]
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 0
+offset_left = 5.0
+offset_top = 105.0
+offset_right = 105.0
+offset_bottom = 130.0
+text = "x0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="IconoObjeto" type="TextureRect" parent="." unique_id=1109985732]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 5.0
+offset_right = 80.0
+offset_bottom = 50.0
+expand_mode = 1
+stretch_mode = 5

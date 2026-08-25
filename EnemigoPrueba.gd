@@ -371,8 +371,6 @@ func atacar_heroe() -> void:
 			return
 
 
-	print("ENEMIGO ATACA AL HÉROE")
-	print("ATAQUE ENEMIGO:", ataque_base)
 
 
 	heroe.recibir_dano(ataque_base)
@@ -402,14 +400,6 @@ func recibir_dano(cantidad: int) -> void:
 	actualizar_interfaz_vida()
 
 
-	print(
-		"ENEMIGO RECIBE %d DE DAÑO. VIDA: %d/%d"
-		% [
-			cantidad,
-			vida_actual,
-			vida_maxima
-		]
-	)
 
 
 	if vida_actual <= 0:
