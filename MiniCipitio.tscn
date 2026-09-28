@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://c320vyayp7dqi"]
+
+[ext_resource type="Script" path="res://MiniCipitio.gd" id="1_5usuq"]
+[ext_resource type="Script" uid="uid://d0qkxc03o7kep" path="res://SistemaDrops.gd" id="2_q0kth"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_e5ioe"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_whuy3"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_5vvyt"]
+viewport_path = NodePath("ViewportVida")
+
+[node name="MiniCipitio" type="CharacterBody3D" unique_id=2010731475]
+script = ExtResource("1_5usuq")
+vida_maxima = 70
+ataque_base = 8
+velocidad_movimiento = 3.0
+distancia_deteccion = 8.0
+tiempo_entre_ataques = 1.5
+tiempo_respawn = 8.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=158810925]
+mesh = SubResource("CapsuleMesh_e5ioe")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2065687814]
+shape = SubResource("CapsuleShape3D_whuy3")
+
+[node name="VidaLabel" type="Label3D" parent="." unique_id=136821185]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+billboard = 1
+text = "100 / 100"
+
+[node name="ViewportVida" type="SubViewport" parent="." unique_id=1101712965]
+size = Vector2i(180, 24)
+
+[node name="BarraVida" type="ProgressBar" parent="ViewportVida" unique_id=393739751]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 100.0
+
+[node name="BarraVida3D" type="Sprite3D" parent="." unique_id=968079139]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.005
+billboard = 1
+texture = SubResource("ViewportTexture_5vvyt")
+
+[node name="SistemaDrops" type="Node" parent="." unique_id=1188638780]
+script = ExtResource("2_q0kth")

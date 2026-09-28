@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://cpb05hwbxbm77" path="res://EnemigoPrueba.gd" id="3_r0du0"]
 [ext_resource type="Material" uid="uid://c2y66k080fws6" path="res://MaterialPantalon.tres" id="4_fos0i"]
 [ext_resource type="Script" uid="uid://cokjaukgd33hs" path="res://SantuarioCheckpoint.gd" id="6_3dxm6"]
+[ext_resource type="PackedScene" uid="uid://c320vyayp7dqi" path="res://MiniCipitio.tscn" id="6_trn2v"]
 [ext_resource type="Script" uid="uid://b0khvsy334yjx" path="res://HUDInventario.gd" id="7_lgr22"]
 [ext_resource type="Script" uid="uid://d0qkxc03o7kep" path="res://SistemaDrops.gd" id="7_trn2v"]
 
@@ -42,8 +43,12 @@ radius = 1.5
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_whuy3"]
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_5vvyt"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_u48m0"]
 viewport_path = NodePath("ZonaEnemigos/EnemigoPrueba/ViewportVida")
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_03owx"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wkp8b"]
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_20pc6"]
 viewport_path = NodePath("ZonaEnemigos/Enemigo3/ViewportVida")
@@ -188,25 +193,30 @@ mesh = SubResource("CylinderMesh_j115u")
 
 [node name="ZonaEnemigos" type="Node3D" parent="." unique_id=1716457963]
 
-[node name="EnemigoPrueba" type="CharacterBody3D" parent="ZonaEnemigos" unique_id=13959930]
+[node name="MiniCipitio" parent="ZonaEnemigos" unique_id=2010731475 instance=ExtResource("6_trn2v")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1, -8)
+
+[node name="EnemigoPrueba" type="CharacterBody3D" parent="ZonaEnemigos" unique_id=2082957938]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4)
 script = ExtResource("3_r0du0")
+distancia_deteccion = 8.0
+tiempo_entre_ataques = 1.5
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=401224740]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=158810925]
 mesh = SubResource("CapsuleMesh_e5ioe")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=1862080325]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=2065687814]
 shape = SubResource("CapsuleShape3D_whuy3")
 
-[node name="VidaLabel" type="Label3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=479377998]
+[node name="VidaLabel" type="Label3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=136821185]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 billboard = 1
 text = "100 / 100"
 
-[node name="ViewportVida" type="SubViewport" parent="ZonaEnemigos/EnemigoPrueba" unique_id=1899773443]
+[node name="ViewportVida" type="SubViewport" parent="ZonaEnemigos/EnemigoPrueba" unique_id=1101712965]
 size = Vector2i(180, 24)
 
-[node name="BarraVida" type="ProgressBar" parent="ZonaEnemigos/EnemigoPrueba/ViewportVida" unique_id=235704573]
+[node name="BarraVida" type="ProgressBar" parent="ZonaEnemigos/EnemigoPrueba/ViewportVida" unique_id=393739751]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -214,13 +224,13 @@ grow_horizontal = 2
 grow_vertical = 2
 value = 100.0
 
-[node name="BarraVida3D" type="Sprite3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=879913633]
+[node name="BarraVida3D" type="Sprite3D" parent="ZonaEnemigos/EnemigoPrueba" unique_id=968079139]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
 pixel_size = 0.005
 billboard = 1
-texture = SubResource("ViewportTexture_5vvyt")
+texture = SubResource("ViewportTexture_u48m0")
 
-[node name="SistemaDrops" type="Node" parent="ZonaEnemigos/EnemigoPrueba" unique_id=1208793516]
+[node name="SistemaDrops" type="Node" parent="ZonaEnemigos/EnemigoPrueba" unique_id=1188638780]
 script = ExtResource("7_trn2v")
 
 [node name="Enemigo3" type="CharacterBody3D" parent="ZonaEnemigos" unique_id=1000143047]
@@ -228,10 +238,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1, -6)
 script = ExtResource("3_r0du0")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="ZonaEnemigos/Enemigo3" unique_id=2084863696]
-mesh = SubResource("CapsuleMesh_e5ioe")
+mesh = SubResource("CapsuleMesh_03owx")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ZonaEnemigos/Enemigo3" unique_id=1356225353]
-shape = SubResource("CapsuleShape3D_whuy3")
+shape = SubResource("CapsuleShape3D_wkp8b")
 
 [node name="VidaLabel" type="Label3D" parent="ZonaEnemigos/Enemigo3" unique_id=1279166613]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
@@ -260,10 +270,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1, -6)
 script = ExtResource("3_r0du0")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="ZonaEnemigos/Enemigo2" unique_id=1200525093]
-mesh = SubResource("CapsuleMesh_e5ioe")
+mesh = SubResource("CapsuleMesh_03owx")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ZonaEnemigos/Enemigo2" unique_id=424109286]
-shape = SubResource("CapsuleShape3D_whuy3")
+shape = SubResource("CapsuleShape3D_wkp8b")
 
 [node name="VidaLabel" type="Label3D" parent="ZonaEnemigos/Enemigo2" unique_id=1584550997]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)

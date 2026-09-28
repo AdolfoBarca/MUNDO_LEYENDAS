@@ -1,571 +1,767 @@
 extends CharacterBody3D
 
 # =========================================================
+
 # MOVIMIENTO Y ATAQUE
+
 # =========================================================
 
 @export var move_speed: float = 5.0
+
 @export var attack_cooldown: float = 0.5
 
 @export var dano: int = 20
+
 @export var defensa: int = 3
 
-
 # =========================================================
+
 # VIDA DEL HÉROE
+
 # =========================================================
 
 @export var vida_maxima: int = 100
+
 @export var regeneracion_por_segundo: int = 2
+
 @export var espera_para_regenerar: float = 5.0
 
 var vida_actual: int
+
 var esta_muerto: bool = false
+
 var en_zona_segura: bool = false
 
 var temporizador_regeneracion: float = 0.0
+
 var tiempo_desde_ultimo_dano: float = 0.0
 
-
 # =========================================================
+
 # RESPAWN Y CHECKPOINT
+
 # =========================================================
 
 @export var tiempo_respawn: float = 3.0
 
 var posicion_respawn_actual: Vector3
+
 var checkpoint_actual: Vector3
+
 var checkpoint_activado: bool = false
 
-
 # =========================================================
+
 # NIVEL Y EXPERIENCIA
+
 # =========================================================
 
 @export var nivel: int = 1
+
 @export var experiencia_para_siguiente_nivel: int = 100
 
 var experiencia_actual: int = 0
 
-
 # =========================================================
+
 # APARIENCIA
+
 # =========================================================
 
 @export var color_piel: Color = Color("#C98F65")
+
 @export var color_camisa: Color = Color("#244A73")
+
 @export var color_pantalon: Color = Color("#2F3540")
 
-
 # =========================================================
+
 # VARIABLES GENERALES
+
 # =========================================================
 
 var gravity: float = ProjectSettings.get_setting(
-	"physics/3d/default_gravity"
+
+    "physics/3d/default_gravity"
+
 )
 
 var attack_timer: float = 0.0
 
+# EFECTO DE CENIZA MÁGICA
+var tiempo_ceniza: float = 0.0
+var multiplicador_velocidad_ceniza: float = 1.0
+
+func aplicar_ceniza_magica(duracion: float = 4.0, reduccion: float = 0.30) -> void:
+    if esta_muerto or en_zona_segura:
+        return
+    tiempo_ceniza = max(tiempo_ceniza, duracion)
+    multiplicador_velocidad_ceniza = clampf(1.0 - reduccion, 0.1, 1.0)
+    print("CENIZA MÁGICA: velocidad reducida durante ", duracion, " segundos")
+
+func limpiar_ceniza_magica() -> void:
+    tiempo_ceniza = 0.0
+    multiplicador_velocidad_ceniza = 1.0
+
 
 # =========================================================
+
 # NODOS
+
 # =========================================================
 
 @onready var camera: Camera3D = get_viewport().get_camera_3d()
 
 @onready var cabeza: MeshInstance3D = $Cabeza
+
 @onready var brazo_izquierdo: MeshInstance3D = $BrazoIzquierdo
+
 @onready var brazo_derecho: MeshInstance3D = $BrazoDerecho
+
 @onready var cuerpo: MeshInstance3D = $Cuerpo
+
 @onready var pierna_izquierda: MeshInstance3D = $PiernaIzquierda
+
 @onready var pierna_derecha: MeshInstance3D = $PiernaDerecha
 
 @onready var nombre_label: Label3D = $NombreHeroe
 
 @onready var barra_vida: ProgressBar = get_node("../Interfaz/BarraVida")
+
 @onready var texto_vida: Label = get_node("../Interfaz/TextoVida")
+
 @onready var texto_nivel: Label = get_node("../Interfaz/TextoNivel")
+
 @onready var texto_experiencia: Label = get_node("../Interfaz/TextoExperiencia")
+
 @onready var barra_experiencia: ProgressBar = get_node("../Interfaz/BarraExperiencia")
+
 @onready var texto_derrota: Label = get_node("../Interfaz/TextoDerrota")
+
 @onready var punto_respawn: Marker3D = get_node("../PuntoRespawn")
 
-
 # =========================================================
+
 # INICIO
+
 # =========================================================
 
 func _ready() -> void:
 
-	vida_actual = vida_maxima
-	esta_muerto = false
-	en_zona_segura = false
+    vida_actual = vida_maxima
 
-	temporizador_regeneracion = 0.0
-	tiempo_desde_ultimo_dano = espera_para_regenerar
+    limpiar_ceniza_magica()
 
-	if punto_respawn != null:
-		posicion_respawn_actual = punto_respawn.global_position
-	else:
-		posicion_respawn_actual = global_position
+    esta_muerto = false
 
-	color_piel = DatosJugador.color_piel
-	color_camisa = DatosJugador.color_camisa
-	color_pantalon = DatosJugador.color_pantalon
+    en_zona_segura = false
 
-	aplicar_colores_personaje()
+    temporizador_regeneracion = 0.0
 
-	if nombre_label != null:
-		nombre_label.text = DatosJugador.nombre
+    tiempo_desde_ultimo_dano = espera_para_regenerar
 
-	if texto_derrota != null:
-		texto_derrota.visible = false
+    if punto_respawn != null:
 
-	actualizar_interfaz()
+        posicion_respawn_actual = punto_respawn.global_position
 
-	print("==============================")
-	print("HÉROE CARGADO EN EL MAPA")
-	print("Nombre: ", DatosJugador.nombre)
-	print("País: ", DatosJugador.pais)
-	print("Nivel: ", nivel)
-	print("Experiencia: ", experiencia_actual, "/", experiencia_para_siguiente_nivel)
-	print("Vida: ", vida_actual, "/", vida_maxima)
-	print("Daño: ", dano)
-	print("Defensa: ", defensa)
-	print("Respawn inicial: ", posicion_respawn_actual)
-	print("==============================")
+    else:
 
+        posicion_respawn_actual = global_position
+
+    color_piel = DatosJugador.color_piel
+
+    color_camisa = DatosJugador.color_camisa
+
+    color_pantalon = DatosJugador.color_pantalon
+
+    aplicar_colores_personaje()
+
+    if nombre_label != null:
+
+        nombre_label.text = DatosJugador.nombre
+
+    if texto_derrota != null:
+
+        texto_derrota.visible = false
+
+    actualizar_interfaz()
+
+    print("==============================")
+
+    print("HÉROE CARGADO EN EL MAPA")
+
+    print("Nombre: ", DatosJugador.nombre)
+
+    print("País: ", DatosJugador.pais)
+
+    print("Nivel: ", nivel)
+
+    print("Experiencia: ", experiencia_actual, "/", experiencia_para_siguiente_nivel)
+
+    print("Vida: ", vida_actual, "/", vida_maxima)
+
+    print("Daño: ", dano)
+
+    print("Defensa: ", defensa)
+
+    print("Respawn inicial: ", posicion_respawn_actual)
+
+    print("==============================")
 
 # =========================================================
+
 # ZONA SEGURA
+
 # =========================================================
 
 func entrar_zona_segura() -> void:
 
-	if en_zona_segura:
-		return
+    if en_zona_segura:
 
-	en_zona_segura = true
+        return
 
-	print("================================")
-	print("ZONA SEGURA ACTIVADA")
-	print("El héroe no puede recibir daño.")
-	print("================================")
+    en_zona_segura = true
 
+    print("================================")
+
+    print("ZONA SEGURA ACTIVADA")
+
+    print("El héroe no puede recibir daño.")
+
+    print("================================")
 
 func salir_zona_segura() -> void:
 
-	if not en_zona_segura:
-		return
+    if not en_zona_segura:
 
-	en_zona_segura = false
+        return
 
-	print("================================")
-	print("ZONA SEGURA DESACTIVADA")
-	print("El héroe vuelve a ser vulnerable.")
-	print("================================")
+    en_zona_segura = false
 
+    print("================================")
+
+    print("ZONA SEGURA DESACTIVADA")
+
+    print("El héroe vuelve a ser vulnerable.")
+
+    print("================================")
 
 func esta_en_zona_segura() -> bool:
-	return en_zona_segura
 
+    return en_zona_segura
 
 # =========================================================
+
 # CHECKPOINT
+
 # =========================================================
 
 func activar_checkpoint(nueva_posicion: Vector3) -> void:
 
-	if checkpoint_activado:
-		if checkpoint_actual.distance_to(nueva_posicion) < 0.01:
-			return
+    if checkpoint_activado:
 
-	checkpoint_activado = true
-	checkpoint_actual = nueva_posicion
-	posicion_respawn_actual = nueva_posicion
+        if checkpoint_actual.distance_to(nueva_posicion) < 0.01:
 
-	print("================================")
-	print("CHECKPOINT ACTIVADO")
-	print("Nuevo punto de respawn: ", posicion_respawn_actual)
-	print("================================")
+            return
 
+    checkpoint_activado = true
+
+    checkpoint_actual = nueva_posicion
+
+    posicion_respawn_actual = nueva_posicion
+
+    print("================================")
+
+    print("CHECKPOINT ACTIVADO")
+
+    print("Nuevo punto de respawn: ", posicion_respawn_actual)
+
+    print("================================")
 
 # =========================================================
+
 # VIDA Y DEFENSA
+
 # =========================================================
 
 func recibir_dano(cantidad: int) -> void:
 
-	if esta_muerto:
-		return
+    if esta_muerto:
 
-	if en_zona_segura:
-		return
+        return
 
-	var dano_final: int = max(cantidad - defensa, 1)
+    if en_zona_segura:
 
-	vida_actual -= dano_final
+        return
 
-	if vida_actual < 0:
-		vida_actual = 0
+    var dano_final: int = max(cantidad - defensa, 1)
 
-	tiempo_desde_ultimo_dano = 0.0
-	temporizador_regeneracion = 0.0
+    vida_actual -= dano_final
 
-	actualizar_interfaz()
+    if vida_actual < 0:
 
-	if vida_actual <= 0:
-		morir()
+        vida_actual = 0
 
+    tiempo_desde_ultimo_dano = 0.0
+
+    temporizador_regeneracion = 0.0
+
+    actualizar_interfaz()
+
+    if vida_actual <= 0:
+
+        morir()
 
 # =========================================================
+
 # REGENERACIÓN
+
 # =========================================================
 
 func regenerar_vida(delta: float) -> void:
 
-	if esta_muerto:
-		return
+    if esta_muerto:
 
-	if vida_actual >= vida_maxima:
-		return
+        return
 
-	tiempo_desde_ultimo_dano += delta
+    if vida_actual >= vida_maxima:
 
-	if tiempo_desde_ultimo_dano < espera_para_regenerar:
-		return
+        return
 
-	temporizador_regeneracion += delta
+    tiempo_desde_ultimo_dano += delta
 
-	if temporizador_regeneracion >= 1.0:
+    if tiempo_desde_ultimo_dano < espera_para_regenerar:
 
-		vida_actual += regeneracion_por_segundo
+        return
 
-		if vida_actual > vida_maxima:
-			vida_actual = vida_maxima
+    temporizador_regeneracion += delta
 
-		actualizar_interfaz()
+    if temporizador_regeneracion >= 1.0:
 
-		temporizador_regeneracion = 0.0
+        vida_actual += regeneracion_por_segundo
 
+        if vida_actual > vida_maxima:
+
+            vida_actual = vida_maxima
+
+        actualizar_interfaz()
+
+        temporizador_regeneracion = 0.0
 
 # =========================================================
+
 # MUERTE Y RESPAWN
+
 # =========================================================
 
 func morir() -> void:
 
-	if esta_muerto:
-		return
+    if esta_muerto:
 
-	esta_muerto = true
-	vida_actual = 0
+        return
 
-	velocity = Vector3.ZERO
+    esta_muerto = true
 
-	actualizar_interfaz()
+    limpiar_ceniza_magica()
 
-	if texto_derrota != null:
-		texto_derrota.visible = true
+    vida_actual = 0
 
-	print("==============================")
-	print("HÉROE DERROTADO")
-	print("Reapareciendo en ", tiempo_respawn, " segundos...")
-	print("==============================")
+    velocity = Vector3.ZERO
 
-	await get_tree().create_timer(tiempo_respawn).timeout
+    actualizar_interfaz()
 
-	respawn()
+    if texto_derrota != null:
 
+        texto_derrota.visible = true
+
+    print("==============================")
+
+    print("HÉROE DERROTADO")
+
+    print("Reapareciendo en ", tiempo_respawn, " segundos...")
+
+    print("==============================")
+
+    await get_tree().create_timer(tiempo_respawn).timeout
+
+    respawn()
 
 func respawn() -> void:
 
-	global_position = posicion_respawn_actual
+    global_position = posicion_respawn_actual
 
-	vida_actual = vida_maxima
-	esta_muerto = false
+    vida_actual = vida_maxima
 
-	temporizador_regeneracion = 0.0
-	tiempo_desde_ultimo_dano = espera_para_regenerar
+    limpiar_ceniza_magica()
 
-	velocity = Vector3.ZERO
+    esta_muerto = false
 
-	if texto_derrota != null:
-		texto_derrota.visible = false
+    temporizador_regeneracion = 0.0
 
-	actualizar_interfaz()
+    tiempo_desde_ultimo_dano = espera_para_regenerar
 
-	print("==============================")
-	print("HÉROE REAPARECIÓ")
-	print("Posición: ", global_position)
-	print("Vida: ", vida_actual, "/", vida_maxima)
-	print("==============================")
+    velocity = Vector3.ZERO
 
+    if texto_derrota != null:
+
+        texto_derrota.visible = false
+
+    actualizar_interfaz()
+
+    print("==============================")
+
+    print("HÉROE REAPARECIÓ")
+
+    print("Posición: ", global_position)
+
+    print("Vida: ", vida_actual, "/", vida_maxima)
+
+    print("==============================")
 
 # =========================================================
+
 # EXPERIENCIA
+
 # =========================================================
 
 func recibir_experiencia(cantidad: int) -> void:
 
-	if cantidad <= 0:
-		return
+    if cantidad <= 0:
 
-	experiencia_actual += cantidad
+        return
 
-	print("==============================")
-	print("+", cantidad, " XP")
-	print("EXPERIENCIA: ", experiencia_actual, "/", experiencia_para_siguiente_nivel)
-	print("==============================")
+    experiencia_actual += cantidad
 
-	comprobar_subida_nivel()
+    print("==============================")
 
-	actualizar_interfaz()
+    print("+", cantidad, " XP")
 
+    print("EXPERIENCIA: ", experiencia_actual, "/", experiencia_para_siguiente_nivel)
+
+    print("==============================")
+
+    comprobar_subida_nivel()
+
+    actualizar_interfaz()
 
 func ganar_experiencia(cantidad: int) -> void:
-	recibir_experiencia(cantidad)
 
+    recibir_experiencia(cantidad)
 
 func comprobar_subida_nivel() -> void:
 
-	while experiencia_actual >= experiencia_para_siguiente_nivel:
+    while experiencia_actual >= experiencia_para_siguiente_nivel:
 
-		experiencia_actual -= experiencia_para_siguiente_nivel
+        experiencia_actual -= experiencia_para_siguiente_nivel
 
-		subir_nivel()
-
+        subir_nivel()
 
 # =========================================================
+
 # SUBIR DE NIVEL
+
 # =========================================================
 
 func subir_nivel() -> void:
 
-	nivel += 1
+    nivel += 1
 
-	vida_maxima += 10
-	dano += 2
-	defensa += 1
+    vida_maxima += 10
 
-	vida_actual = vida_maxima
+    dano += 2
 
-	experiencia_para_siguiente_nivel += 50
+    defensa += 1
 
-	actualizar_interfaz()
+    vida_actual = vida_maxima
 
-	print("")
-	print("================================")
-	print("¡SUBIDA DE NIVEL!")
-	print("NIVEL: ", nivel)
-	print("VIDA MÁXIMA: ", vida_maxima)
-	print("DAÑO: ", dano)
-	print("DEFENSA: ", defensa)
-	print("SIGUIENTE NIVEL: ", experiencia_actual, "/", experiencia_para_siguiente_nivel, " XP")
-	print("================================")
-	print("")
+    experiencia_para_siguiente_nivel += 50
 
+    actualizar_interfaz()
+
+    print("")
+
+    print("================================")
+
+    print("¡SUBIDA DE NIVEL!")
+
+    print("NIVEL: ", nivel)
+
+    print("VIDA MÁXIMA: ", vida_maxima)
+
+    print("DAÑO: ", dano)
+
+    print("DEFENSA: ", defensa)
+
+    print("SIGUIENTE NIVEL: ", experiencia_actual, "/", experiencia_para_siguiente_nivel, " XP")
+
+    print("================================")
+
+    print("")
 
 # =========================================================
+
 # INTERFAZ
+
 # =========================================================
 
 func actualizar_interfaz() -> void:
 
-	if barra_vida != null:
-		barra_vida.min_value = 0
-		barra_vida.max_value = vida_maxima
-		barra_vida.value = vida_actual
+    if barra_vida != null:
 
-	if texto_vida != null:
-		texto_vida.text = "%s   %d / %d" % [
-			DatosJugador.nombre,
-			vida_actual,
-			vida_maxima
-		]
+        barra_vida.min_value = 0
 
-	if texto_nivel != null:
-		texto_nivel.text = "Nivel %d" % nivel
+        barra_vida.max_value = vida_maxima
 
-	if texto_experiencia != null:
-		texto_experiencia.text = "XP %d / %d" % [
-			experiencia_actual,
-			experiencia_para_siguiente_nivel
-		]
+        barra_vida.value = vida_actual
 
-	if barra_experiencia != null:
-		barra_experiencia.min_value = 0
-		barra_experiencia.max_value = experiencia_para_siguiente_nivel
-		barra_experiencia.value = experiencia_actual
+    if texto_vida != null:
 
+        texto_vida.text = "%s   %d / %d" % [
+
+            DatosJugador.nombre,
+
+            vida_actual,
+
+            vida_maxima
+
+        ]
+
+    if texto_nivel != null:
+
+        texto_nivel.text = "Nivel %d" % nivel
+
+    if texto_experiencia != null:
+
+        texto_experiencia.text = "XP %d / %d" % [
+
+            experiencia_actual,
+
+            experiencia_para_siguiente_nivel
+
+        ]
+
+    if barra_experiencia != null:
+
+        barra_experiencia.min_value = 0
+
+        barra_experiencia.max_value = experiencia_para_siguiente_nivel
+
+        barra_experiencia.value = experiencia_actual
 
 # =========================================================
+
 # APLICAR APARIENCIA
+
 # =========================================================
 
 func aplicar_colores_personaje() -> void:
 
-	aplicar_color_piel()
-	aplicar_color_camisa()
-	aplicar_color_pantalon()
+    aplicar_color_piel()
 
+    aplicar_color_camisa()
+
+    aplicar_color_pantalon()
 
 func aplicar_color_piel() -> void:
 
-	var partes_piel = [
-		cabeza,
-		brazo_izquierdo,
-		brazo_derecho
-	]
+    var partes_piel = [
 
-	for parte in partes_piel:
+        cabeza,
 
-		if parte != null:
+        brazo_izquierdo,
 
-			var material = parte.get_surface_override_material(0)
+        brazo_derecho
 
-			if material != null:
-				material.albedo_color = color_piel
+    ]
 
+    for parte in partes_piel:
+
+        if parte != null:
+
+            var material = parte.get_surface_override_material(0)
+
+            if material != null:
+
+                material.albedo_color = color_piel
 
 func aplicar_color_camisa() -> void:
 
-	if cuerpo != null:
+    if cuerpo != null:
 
-		var material = cuerpo.get_surface_override_material(0)
+        var material = cuerpo.get_surface_override_material(0)
 
-		if material != null:
-			material.albedo_color = color_camisa
+        if material != null:
 
+            material.albedo_color = color_camisa
 
 func aplicar_color_pantalon() -> void:
 
-	var piernas = [
-		pierna_izquierda,
-		pierna_derecha
-	]
+    var piernas = [
 
-	for pierna in piernas:
+        pierna_izquierda,
 
-		if pierna != null:
+        pierna_derecha
 
-			var material = pierna.get_surface_override_material(0)
+    ]
 
-			if material != null:
-				material.albedo_color = color_pantalon
+    for pierna in piernas:
 
+        if pierna != null:
+
+            var material = pierna.get_surface_override_material(0)
+
+            if material != null:
+
+                material.albedo_color = color_pantalon
 
 # =========================================================
+
 # ATAQUE
+
 # =========================================================
 
 func _input(event: InputEvent) -> void:
 
-	if esta_muerto:
-		return
+    if esta_muerto:
 
-	if event is InputEventMouseButton:
+        return
 
-		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+    if event is InputEventMouseButton:
 
-			if attack_timer <= 0.0:
+        if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 
-				attack_timer = attack_cooldown
+            if attack_timer <= 0.0:
 
-				var area_ataque: Area3D = get_node_or_null("AreaAtaque")
+                attack_timer = attack_cooldown
 
-				if area_ataque == null:
-					return
+                var area_ataque: Area3D = get_node_or_null("AreaAtaque")
 
-				var enemigo_mas_cercano: Node3D = null
-				var distancia_mas_cercana: float = INF
+                if area_ataque == null:
 
-				for body in area_ataque.get_overlapping_bodies():
+                    return
 
-					if body == self:
-						continue
+                var enemigo_mas_cercano: Node3D = null
 
-					if not body.has_method("recibir_dano"):
-						continue
+                var distancia_mas_cercana: float = INF
 
-					if not body is Node3D:
-						continue
+                for body in area_ataque.get_overlapping_bodies():
 
-					var distancia: float = global_position.distance_to(body.global_position)
+                    if body == self:
 
-					if distancia < distancia_mas_cercana:
-						distancia_mas_cercana = distancia
-						enemigo_mas_cercano = body
+                        continue
 
-				if enemigo_mas_cercano != null:
-					enemigo_mas_cercano.recibir_dano(dano)
+                    if not body.has_method("recibir_dano"):
 
+                        continue
+
+                    if not body is Node3D:
+
+                        continue
+
+                    var distancia: float = global_position.distance_to(body.global_position)
+
+                    if distancia < distancia_mas_cercana:
+
+                        distancia_mas_cercana = distancia
+
+                        enemigo_mas_cercano = body
+
+                if enemigo_mas_cercano != null:
+
+                    enemigo_mas_cercano.recibir_dano(dano)
 
 # =========================================================
+
 # MOVIMIENTO
+
 # =========================================================
 
 func _physics_process(delta: float) -> void:
 
-	if esta_muerto:
-		velocity = Vector3.ZERO
-		move_and_slide()
-		return
+    if esta_muerto:
 
-	regenerar_vida(delta)
+        velocity = Vector3.ZERO
 
-	var move_dir := Vector3.ZERO
+        move_and_slide()
 
-	if camera != null:
+        return
 
-		var cam_forward := -camera.global_basis.z
-		var cam_right := camera.global_basis.x
+    regenerar_vida(delta)
 
-		cam_forward.y = 0.0
-		cam_right.y = 0.0
+    if tiempo_ceniza > 0.0:
+        tiempo_ceniza = maxf(0.0, tiempo_ceniza - delta)
+        if tiempo_ceniza <= 0.0:
+            limpiar_ceniza_magica()
+            print("CENIZA MÁGICA: velocidad recuperada")
 
-		cam_forward = cam_forward.normalized()
-		cam_right = cam_right.normalized()
+    var move_dir := Vector3.ZERO
 
-		if Input.is_physical_key_pressed(KEY_W):
-			move_dir += cam_forward
+    if camera != null:
 
-		if Input.is_physical_key_pressed(KEY_S):
-			move_dir -= cam_forward
+        var cam_forward := -camera.global_basis.z
 
-		if Input.is_physical_key_pressed(KEY_A):
-			move_dir -= cam_right
+        var cam_right := camera.global_basis.x
 
-		if Input.is_physical_key_pressed(KEY_D):
-			move_dir += cam_right
+        cam_forward.y = 0.0
 
-	else:
+        cam_right.y = 0.0
 
-		if Input.is_physical_key_pressed(KEY_W):
-			move_dir.z -= 1.0
+        cam_forward = cam_forward.normalized()
 
-		if Input.is_physical_key_pressed(KEY_S):
-			move_dir.z += 1.0
+        cam_right = cam_right.normalized()
 
-		if Input.is_physical_key_pressed(KEY_A):
-			move_dir.x -= 1.0
+        if Input.is_physical_key_pressed(KEY_W):
 
-		if Input.is_physical_key_pressed(KEY_D):
-			move_dir.x += 1.0
+            move_dir += cam_forward
 
-	if move_dir != Vector3.ZERO:
-		move_dir = move_dir.normalized()
+        if Input.is_physical_key_pressed(KEY_S):
 
-	velocity.x = move_dir.x * move_speed
-	velocity.z = move_dir.z * move_speed
+            move_dir -= cam_forward
 
-	if not is_on_floor():
-		velocity.y -= gravity * delta
-	else:
-		velocity.y = 0.0
+        if Input.is_physical_key_pressed(KEY_A):
 
-	move_and_slide()
+            move_dir -= cam_right
 
-	if attack_timer > 0.0:
-		attack_timer -= delta
+        if Input.is_physical_key_pressed(KEY_D):
+
+            move_dir += cam_right
+
+    else:
+
+        if Input.is_physical_key_pressed(KEY_W):
+
+            move_dir.z -= 1.0
+
+        if Input.is_physical_key_pressed(KEY_S):
+
+            move_dir.z += 1.0
+
+        if Input.is_physical_key_pressed(KEY_A):
+
+            move_dir.x -= 1.0
+
+        if Input.is_physical_key_pressed(KEY_D):
+
+            move_dir.x += 1.0
+
+    if move_dir != Vector3.ZERO:
+
+        move_dir = move_dir.normalized()
+
+    velocity.x = move_dir.x * move_speed * multiplicador_velocidad_ceniza
+
+    velocity.z = move_dir.z * move_speed * multiplicador_velocidad_ceniza
+
+    if not is_on_floor():
+
+        velocity.y -= gravity * delta
+
+    else:
+
+        velocity.y = 0.0
+
+    move_and_slide()
+
+    if attack_timer > 0.0:
+
+        attack_timer -= delta
