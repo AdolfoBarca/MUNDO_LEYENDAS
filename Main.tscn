@@ -265,6 +265,9 @@ pixel_size = 0.005
 billboard = 1
 texture = SubResource("ViewportTexture_20pc6")
 
+[node name="SistemaDrops" type="Node" parent="ZonaEnemigos/Enemigo3" unique_id=1696156422]
+script = ExtResource("7_trn2v")
+
 [node name="Enemigo2" type="CharacterBody3D" parent="ZonaEnemigos" unique_id=1396595369]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1, -6)
 script = ExtResource("3_r0du0")
@@ -296,6 +299,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
 pixel_size = 0.005
 billboard = 1
 texture = SubResource("ViewportTexture_wkp8b")
+
+[node name="SistemaDrops" type="Node" parent="ZonaEnemigos/Enemigo2" unique_id=1419912418]
+script = ExtResource("7_trn2v")
 
 [node name="HUDInventario" type="CanvasLayer" parent="." unique_id=1950438635]
 script = ExtResource("7_lgr22")

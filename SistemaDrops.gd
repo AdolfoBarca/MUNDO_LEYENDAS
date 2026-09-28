@@ -5,21 +5,26 @@ extends Node
 # SISTEMA UNIVERSAL DE DROPS
 # =========================================================
 
+@export_group("Escena de recompensas")
+
 @export var escena_drop: PackedScene = preload(
 	"res://FragmentoEsencia.tscn"
 )
+
 
 # =========================================================
 # CONFIGURACIÓN
 # =========================================================
 
+@export_group("Recompensas")
+
 @export var generar_fragmentos: bool = true
 
 @export_range(0.0, 100.0, 1.0)
-var probabilidad_ceniza: float = 40.0
+var probabilidad_ceniza: float = 0.0
 
 @export_range(0.0, 100.0, 1.0)
-var probabilidad_sombrero: float = 5.0
+var probabilidad_sombrero: float = 0.0
 
 
 # =========================================================
@@ -27,6 +32,10 @@ var probabilidad_sombrero: float = 5.0
 # =========================================================
 
 func generar_drops(posicion: Vector3) -> void:
+
+	print("==============================")
+	print("GENERANDO RECOMPENSAS")
+	print("CRIATURA: ", get_parent().name)
 
 	if generar_fragmentos:
 		crear_objeto(
@@ -49,6 +58,8 @@ func generar_drops(posicion: Vector3) -> void:
 			posicion
 		)
 
+	print("==============================")
+
 
 # =========================================================
 # CREAR OBJETO EN EL MUNDO
@@ -61,6 +72,7 @@ func crear_objeto(
 ) -> void:
 
 	if escena_drop == null:
+		push_warning("No hay escena de drops configurada.")
 		return
 
 	if not DatosJugador.catalogo_objetos.has(id_objeto):
@@ -74,7 +86,9 @@ func crear_objeto(
 
 	if not objeto.has_method("configurar_drop"):
 		objeto.free()
-		push_error("La escena no admite configurar_drop.")
+		push_error(
+			"La escena no admite configurar_drop."
+		)
 		return
 
 	objeto.configurar_drop(
@@ -90,7 +104,6 @@ func crear_objeto(
 
 	mundo.add_child(objeto)
 
-	# Separar ligeramente los objetos.
 	var desplazamiento = Vector3(
 		randf_range(-0.7, 0.7),
 		0.0,

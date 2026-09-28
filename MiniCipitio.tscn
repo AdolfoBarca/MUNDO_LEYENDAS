@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c320vyayp7dqi"]
 
-[ext_resource type="Script" path="res://MiniCipitio.gd" id="1_5usuq"]
+[ext_resource type="Script" uid="uid://bihr04nq3fhki" path="res://MiniCipitio.gd" id="1_5usuq"]
 [ext_resource type="Script" uid="uid://d0qkxc03o7kep" path="res://SistemaDrops.gd" id="2_q0kth"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_e5ioe"]
@@ -49,3 +49,5 @@ texture = SubResource("ViewportTexture_5vvyt")
 
 [node name="SistemaDrops" type="Node" parent="." unique_id=1188638780]
 script = ExtResource("2_q0kth")
+probabilidad_ceniza = 40.0
+probabilidad_sombrero = 5.0
