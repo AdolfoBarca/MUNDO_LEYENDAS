@@ -1,12 +1,6 @@
 extends Node
 
-
-# =========================================================
-# SEÑALES
-# =========================================================
-
 signal inventario_actualizado
-
 
 # =========================================================
 # DATOS DEL JUGADOR
@@ -14,10 +8,8 @@ signal inventario_actualizado
 
 var nombre: String = ""
 var pais: String = ""
-
 var region: String = ""
 var afinidad: String = ""
-
 
 # =========================================================
 # APARIENCIA
@@ -27,16 +19,51 @@ var color_piel: Color = Color("#C98F65")
 var color_camisa: Color = Color("#244A73")
 var color_pantalon: Color = Color("#2F3540")
 
+# =========================================================
+# CATÁLOGO DE OBJETOS
+# =========================================================
+
+var catalogo_objetos: Dictionary = {
+
+	"fragmento_esencia": {
+		"nombre": "Fragmento de esencia",
+		"tipo": "Material",
+		"rareza": "Común",
+		"descripcion": "Fragmento de energía obtenido de criaturas.",
+		"icono": "res://iconos/fragmento_esencia.png"
+	},
+
+	"ceniza_encantada": {
+		"nombre": "Ceniza encantada",
+		"tipo": "Material",
+		"rareza": "Raro",
+		"descripcion": "Ceniza impregnada de magia del Cipitío.",
+		"icono": "res://iconos/ceniza_encantada.png"
+	},
+
+	"sombrero_deteriorado": {
+		"nombre": "Sombrero deteriorado",
+		"tipo": "Material",
+		"rareza": "Raro",
+		"descripcion": "Un sombrero antiguo utilizado por los mini Cipitíos.",
+		"icono": "res://iconos/sombrero_deteriorado.png"
+	},
+
+	"sombrero_cipitio": {
+		"nombre": "Sombrero legendario del Cipitío",
+		"tipo": "Equipamiento",
+		"rareza": "Legendario",
+		"descripcion": "Un sombrero que contiene poderes sobrenaturales.",
+		"icono": "" 
+	}
+}
 
 # =========================================================
 # INVENTARIO
 # =========================================================
 
-# Variable antigua que mantenemos por compatibilidad
 var fragmentos_esencia: int = 0
 
-
-# Inventario general del jugador
 var inventario: Dictionary = {
 
 	"fragmento_esencia": {
@@ -44,19 +71,18 @@ var inventario: Dictionary = {
 		"tipo": "Material",
 		"cantidad": 0,
 		"rareza": "Común",
+		"descripcion": "Fragmento de energía obtenido de criaturas.",
 		"icono": "res://iconos/fragmento_esencia.png"
 	}
-
 }
 
-
 # =========================================================
-# ASIGNAR REGIÓN Y AFINIDAD
+# REGIÓN Y AFINIDAD
 # =========================================================
 
 func asignar_region_y_afinidad() -> void:
 
-	var centroamerica = [
+	var centroamerica: Array = [
 		"El Salvador",
 		"Guatemala",
 		"Honduras",
@@ -66,17 +92,12 @@ func asignar_region_y_afinidad() -> void:
 		"Belice"
 	]
 
-
 	if pais in centroamerica:
-
 		region = "Centroamérica"
 		afinidad = "Naturaleza"
-
 	else:
-
 		region = ""
 		afinidad = ""
-
 
 	print("==============================")
 	print("DATOS DEL JUGADOR")
@@ -87,7 +108,7 @@ func asignar_region_y_afinidad() -> void:
 
 
 # =========================================================
-# AGREGAR OBJETO AL INVENTARIO
+# AGREGAR OBJETO
 # =========================================================
 
 func agregar_objeto(
@@ -101,64 +122,72 @@ func agregar_objeto(
 	if cantidad <= 0:
 		return
 
-
-	# -----------------------------------------------------
-	# SI EL OBJETO YA EXISTE
-	# -----------------------------------------------------
-
 	if inventario.has(id_objeto):
 
 		inventario[id_objeto]["cantidad"] += cantidad
 
-
-	# -----------------------------------------------------
-	# SI ES UN OBJETO NUEVO
-	# -----------------------------------------------------
-
 	else:
 
+		var datos: Dictionary = catalogo_objetos.get(
+			id_objeto,
+			{}
+		)
+
 		inventario[id_objeto] = {
-			"nombre": nombre_objeto,
-			"tipo": tipo_objeto,
+			"nombre": datos.get("nombre", nombre_objeto),
+			"tipo": datos.get("tipo", tipo_objeto),
 			"cantidad": cantidad,
-			"rareza": rareza,
-			"icono": ""
+			"rareza": datos.get("rareza", rareza),
+			"descripcion": datos.get("descripcion", ""),
+			"icono": datos.get("icono", "")
 		}
 
-
-	# -----------------------------------------------------
-	# COMPATIBILIDAD CON EL SISTEMA ACTUAL
-	# -----------------------------------------------------
-
 	if id_objeto == "fragmento_esencia":
-
-		fragmentos_esencia = inventario[id_objeto]["cantidad"]
-
+		fragmentos_esencia = obtener_cantidad_objeto(
+			"fragmento_esencia"
+		)
 
 	inventario_actualizado.emit()
 
 
 # =========================================================
-# AGREGAR FRAGMENTOS DE ESENCIA
+# AGREGAR OBJETO DESDE EL CATÁLOGO
 # =========================================================
 
-func agregar_fragmentos_esencia(cantidad: int) -> void:
+func agregar_objeto_catalogo(
+	id_objeto: String,
+	cantidad: int = 1
+) -> void:
 
-	if cantidad <= 0:
+	if not catalogo_objetos.has(id_objeto):
+		push_warning("Objeto desconocido: " + id_objeto)
 		return
 
+	var datos: Dictionary = catalogo_objetos[id_objeto]
 
 	agregar_objeto(
-		"fragmento_esencia",
-		"Fragmento de esencia",
-		"Material",
+		id_objeto,
+		str(datos.get("nombre", "Objeto")),
+		str(datos.get("tipo", "Material")),
 		cantidad,
-		"Común"
+		str(datos.get("rareza", "Común"))
 	)
 
 
 # =========================================================
-# OBTENER CANTIDAD DE UN OBJETO
+# AGREGAR FRAGMENTOS
+# =========================================================
+
+func agregar_fragmentos_esencia(cantidad: int) -> void:
+
+	agregar_objeto_catalogo(
+		"fragmento_esencia",
+		cantidad
+	)
+
+
+# =========================================================
+# CONSULTAR OBJETOS
 # =========================================================
 
 func obtener_cantidad_objeto(id_objeto: String) -> int:
@@ -166,32 +195,52 @@ func obtener_cantidad_objeto(id_objeto: String) -> int:
 	if not inventario.has(id_objeto):
 		return 0
 
-
 	return int(
-		inventario[id_objeto]["cantidad"]
+		inventario[id_objeto].get("cantidad", 0)
 	)
 
-
-# =========================================================
-# OBTENER DATOS DE UN OBJETO
-# =========================================================
 
 func obtener_objeto(id_objeto: String) -> Dictionary:
 
 	if not inventario.has(id_objeto):
 		return {}
 
+	return inventario[id_objeto].duplicate(true)
 
-	return inventario[id_objeto]
-
-
-# =========================================================
-# VERIFICAR SI EL JUGADOR TIENE UN OBJETO
-# =========================================================
 
 func tiene_objeto(
 	id_objeto: String,
 	cantidad: int = 1
 ) -> bool:
 
+	if cantidad <= 0:
+		return false
+
 	return obtener_cantidad_objeto(id_objeto) >= cantidad
+
+
+# =========================================================
+# CONSUMIR OBJETOS
+# =========================================================
+
+func consumir_objeto(
+	id_objeto: String,
+	cantidad: int = 1
+) -> bool:
+
+	if cantidad <= 0:
+		return false
+
+	if not tiene_objeto(id_objeto, cantidad):
+		return false
+
+	inventario[id_objeto]["cantidad"] -= cantidad
+
+	if id_objeto == "fragmento_esencia":
+		fragmentos_esencia = obtener_cantidad_objeto(
+			"fragmento_esencia"
+		)
+
+	inventario_actualizado.emit()
+
+	return true

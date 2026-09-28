@@ -18,11 +18,20 @@ extends CharacterBody3D
 
 
 # =========================================================
-# DROP
+# DROP ANTIGUO - COMPATIBILIDAD
 # =========================================================
 
 @export var drop_fragmento: PackedScene = preload(
 	"res://FragmentoEsencia.tscn"
+)
+
+
+# =========================================================
+# SISTEMA UNIVERSAL DE DROPS
+# =========================================================
+
+@onready var sistema_drops: Node = get_node_or_null(
+	"SistemaDrops"
 )
 
 
@@ -58,16 +67,18 @@ enum Estado {
 	REGRESANDO
 }
 
+
 var estado_actual: Estado = Estado.QUIETO
 
 
 # =========================================================
-# READY
+# INICIO
 # =========================================================
 
 func _ready() -> void:
 
 	vida_actual = vida_maxima
+
 	posicion_inicial = global_position
 
 	configurar_interfaz_vida()
@@ -75,6 +86,9 @@ func _ready() -> void:
 
 	print("ENEMIGO CARGADO")
 	print("POSICIÓN INICIAL:", posicion_inicial)
+
+	if sistema_drops != null:
+		print("SISTEMA UNIVERSAL DE DROPS ACTIVADO")
 
 
 # =========================================================
@@ -103,7 +117,6 @@ func actualizar_interfaz_vida() -> void:
 			vida_maxima
 		]
 
-
 	if barra_vida != null:
 
 		barra_vida.max_value = vida_maxima
@@ -121,35 +134,28 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector3.ZERO
 		return
 
-
 	if tiempo_ataque > 0:
 
 		tiempo_ataque -= delta
 
-
 	if heroe == null:
 
 		buscar_heroe()
-
 
 	if heroe == null:
 
 		velocity = Vector3.ZERO
 		return
 
-
 	var distancia_heroe: float = global_position.distance_to(
 		heroe.global_position
 	)
-
 
 	var distancia_origen: float = global_position.distance_to(
 		posicion_inicial
 	)
 
-
 	match estado_actual:
-
 
 		# =================================================
 		# QUIETO
@@ -159,10 +165,7 @@ func _physics_process(delta: float) -> void:
 
 			velocity = Vector3.ZERO
 
-
-			# ---------------------------------------------
-			# IGNORAR AL HÉROE SI ESTÁ EN ZONA SEGURA
-			# ---------------------------------------------
+			# IGNORAR HÉROE EN ZONA SEGURA
 
 			if heroe.has_method("esta_en_zona_segura"):
 
@@ -170,10 +173,7 @@ func _physics_process(delta: float) -> void:
 
 					return
 
-
-			# ---------------------------------------------
 			# DETECTAR HÉROE
-			# ---------------------------------------------
 
 			if distancia_heroe <= distancia_deteccion:
 
@@ -188,10 +188,7 @@ func _physics_process(delta: float) -> void:
 
 		Estado.PERSIGUIENDO:
 
-
-			# ---------------------------------------------
 			# HÉROE EN ZONA SEGURA
-			# ---------------------------------------------
 
 			if heroe.has_method("esta_en_zona_segura"):
 
@@ -205,10 +202,7 @@ func _physics_process(delta: float) -> void:
 
 					return
 
-
-			# ---------------------------------------------
 			# LÍMITE DE PERSECUCIÓN
-			# ---------------------------------------------
 
 			if distancia_origen >= distancia_maxima_persecucion:
 
@@ -219,10 +213,7 @@ func _physics_process(delta: float) -> void:
 
 				return
 
-
-			# ---------------------------------------------
 			# PERSEGUIR O ATACAR
-			# ---------------------------------------------
 
 			if distancia_heroe > distancia_ataque:
 
@@ -245,7 +236,6 @@ func _physics_process(delta: float) -> void:
 				posicion_inicial
 			)
 
-
 			if distancia_a_inicio <= 0.3:
 
 				global_position = posicion_inicial
@@ -255,11 +245,9 @@ func _physics_process(delta: float) -> void:
 
 				print("ENEMIGO VOLVIÓ A SU POSICIÓN")
 
-
 			else:
 
 				mover_hacia_posicion(posicion_inicial)
-
 
 	move_and_slide()
 
@@ -270,8 +258,9 @@ func _physics_process(delta: float) -> void:
 
 func buscar_heroe() -> void:
 
-	var posibles_heroes = get_tree().get_nodes_in_group("heroe")
-
+	var posibles_heroes = get_tree().get_nodes_in_group(
+		"heroe"
+	)
 
 	if posibles_heroes.size() > 0:
 
@@ -279,7 +268,7 @@ func buscar_heroe() -> void:
 
 
 # =========================================================
-# MOVER HACIA HÉROE
+# MOVER HACIA EL HÉROE
 # =========================================================
 
 func mover_hacia_heroe() -> void:
@@ -287,26 +276,21 @@ func mover_hacia_heroe() -> void:
 	if heroe == null:
 		return
 
-
 	var direccion: Vector3 = (
 		heroe.global_position - global_position
 	)
 
 	direccion.y = 0
 
-
 	if direccion.length() <= 0.001:
 
 		velocity = Vector3.ZERO
 		return
 
-
 	direccion = direccion.normalized()
-
 
 	velocity.x = direccion.x * velocidad_movimiento
 	velocity.z = direccion.z * velocidad_movimiento
-
 
 	look_at(
 		Vector3(
@@ -319,7 +303,7 @@ func mover_hacia_heroe() -> void:
 
 
 # =========================================================
-# MOVER HACIA POSICIÓN
+# MOVER HACIA UNA POSICIÓN
 # =========================================================
 
 func mover_hacia_posicion(destino: Vector3) -> void:
@@ -328,15 +312,12 @@ func mover_hacia_posicion(destino: Vector3) -> void:
 
 	direccion.y = 0
 
-
 	if direccion.length() <= 0.001:
 
 		velocity = Vector3.ZERO
 		return
 
-
 	direccion = direccion.normalized()
-
 
 	velocity.x = direccion.x * velocidad_movimiento
 	velocity.z = direccion.z * velocidad_movimiento
@@ -351,30 +332,25 @@ func atacar_heroe() -> void:
 	if tiempo_ataque > 0:
 		return
 
-
 	if heroe == null:
 		return
 
-
 	if not heroe.has_method("recibir_dano"):
 		return
-
 
 	if heroe.has_method("esta_en_zona_segura"):
 
 		if heroe.esta_en_zona_segura():
 
-			print("ATAQUE BLOQUEADO: HÉROE EN ZONA SEGURA")
+			print(
+				"ATAQUE BLOQUEADO: HÉROE EN ZONA SEGURA"
+			)
 
 			estado_actual = Estado.REGRESANDO
 
 			return
 
-
-
-
 	heroe.recibir_dano(ataque_base)
-
 
 	tiempo_ataque = tiempo_entre_ataques
 
@@ -388,19 +364,13 @@ func recibir_dano(cantidad: int) -> void:
 	if esta_muerto:
 		return
 
-
 	vida_actual -= cantidad
-
 
 	if vida_actual < 0:
 
 		vida_actual = 0
 
-
 	actualizar_interfaz_vida()
-
-
-
 
 	if vida_actual <= 0:
 
@@ -408,34 +378,53 @@ func recibir_dano(cantidad: int) -> void:
 
 
 # =========================================================
-# CREAR DROP
+# CREAR DROPS
 # =========================================================
 
 func crear_drop() -> void:
 
+	# -----------------------------------------------------
+	# NUEVO SISTEMA UNIVERSAL
+	# -----------------------------------------------------
+
+	if sistema_drops != null:
+
+		if sistema_drops.has_method("generar_drops"):
+
+			sistema_drops.generar_drops(
+				global_position
+			)
+
+			print("==============================")
+			print("DROPS UNIVERSALES GENERADOS")
+			print("ENEMIGO:", name)
+			print("==============================")
+
+			return
+
+	# -----------------------------------------------------
+	# SISTEMA ANTIGUO
+	# -----------------------------------------------------
+
 	if drop_fragmento == null:
 		return
 
-
 	var fragmento = drop_fragmento.instantiate()
-
 
 	var contenedor_drops = get_tree().current_scene
 
-
 	if contenedor_drops == null:
-		return
 
+		fragmento.free()
+		return
 
 	contenedor_drops.add_child(fragmento)
 
-
 	fragmento.global_position = global_position
 
-
 	print("==============================")
-	print("DROP GENERADO POR: ", name)
-	print("Posición: ", global_position)
+	print("DROP ANTIGUO GENERADO")
+	print("ENEMIGO:", name)
 	print("==============================")
 
 
@@ -448,25 +437,21 @@ func morir() -> void:
 	if esta_muerto:
 		return
 
-
 	esta_muerto = true
 
 	velocity = Vector3.ZERO
 
-
 	print("ENEMIGO DERROTADO")
 
-
-	# ---------------------------------------------
-	# CREAR DROP
-	# ---------------------------------------------
+	# -----------------------------------------------------
+	# CREAR RECOMPENSAS
+	# -----------------------------------------------------
 
 	crear_drop()
 
-
-	# ---------------------------------------------
-	# DAR EXPERIENCIA AL HÉROE
-	# ---------------------------------------------
+	# -----------------------------------------------------
+	# DAR EXPERIENCIA
+	# -----------------------------------------------------
 
 	if heroe != null:
 
@@ -474,36 +459,31 @@ func morir() -> void:
 
 			heroe.ganar_experiencia(100)
 
-
 	print(
 		"ENEMIGO REAPARECERÁ EN %.1f SEGUNDOS"
 		% tiempo_respawn
 	)
 
-
-	# ---------------------------------------------
+	# -----------------------------------------------------
 	# OCULTAR ENEMIGO
-	# ---------------------------------------------
+	# -----------------------------------------------------
 
 	visible = false
 
-
-	# ---------------------------------------------
+	# -----------------------------------------------------
 	# DESACTIVAR COLISIONES
-	# ---------------------------------------------
+	# -----------------------------------------------------
 
 	set_collision_layer_value(1, false)
 	set_collision_mask_value(1, false)
 
-
-	# ---------------------------------------------
-	# ESPERAR RESPAWN
-	# ---------------------------------------------
+	# -----------------------------------------------------
+	# ESPERAR REAPARICIÓN
+	# -----------------------------------------------------
 
 	await get_tree().create_timer(
 		tiempo_respawn
 	).timeout
-
 
 	reaparecer()
 
@@ -524,27 +504,28 @@ func reaparecer() -> void:
 
 	esta_muerto = false
 
-
 	actualizar_interfaz_vida()
 
-
-	# ---------------------------------------------
+	# -----------------------------------------------------
 	# MOSTRAR ENEMIGO
-	# ---------------------------------------------
+	# -----------------------------------------------------
 
 	visible = true
 
-
-	# ---------------------------------------------
+	# -----------------------------------------------------
 	# REACTIVAR COLISIONES
-	# ---------------------------------------------
+	# -----------------------------------------------------
 
 	set_collision_layer_value(1, true)
 	set_collision_mask_value(1, true)
 
-
 	print("==============================")
 	print("ENEMIGO REAPARECIÓ")
-	print("VIDA: %d/%d" % [vida_actual, vida_maxima])
+	print(
+		"VIDA: %d/%d" % [
+			vida_actual,
+			vida_maxima
+		]
+	)
 	print("POSICIÓN:", global_position)
 	print("==============================")
