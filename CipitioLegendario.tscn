@@ -68,11 +68,10 @@ albedo_color = Color(0, 0, 0, 1)
 material = SubResource("StandardMaterial3D_whuy3")
 size = Vector3(2.4, 0.15, 0.05)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hvlbp"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_excdm"]
 albedo_color = Color(1, 0, 0, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_e5ioe"]
-material = SubResource("StandardMaterial3D_hvlbp")
+[sub_resource type="BoxMesh" id="BoxMesh_whuy3"]
 size = Vector3(2.3, 0.1, 0.06)
 
 [node name="CipitioLegendario" type="CharacterBody3D" unique_id=1947435142]
@@ -101,13 +100,6 @@ shape = SubResource("CapsuleShape3D_hvlbp")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.8, 0)
 billboard = 1
 text = "CIPITÍO LEGENDARIO"
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1170527984]
-transform = Transform3D(0.8660254, -0.35355338, 0.35355338, 0, 0.70710677, 0.70710677, -0.5, -0.6123724, 0.6123724, 0, 0, 0)
-
-[node name="CamaraPrueba" type="Camera3D" parent="DirectionalLight3D" unique_id=1697863181]
-transform = Transform3D(0.9993908, -0.011936322, 0.032794803, 0.024677634, 0.9061604, -0.4222135, -0.024677634, 0.42276555, 0.90590304, -0.4019239, -2.2600207, 7.2097683)
-current = true
 
 [node name="OjoIzquierdo" type="MeshInstance3D" parent="." unique_id=1915311589]
 transform = Transform3D(0.13, 0, 0, 0, 0.13, 0, 0, 0, 0.13, -0.25, 3.15, 0.55)
@@ -143,6 +135,7 @@ mesh = SubResource("CapsuleMesh_whuy3")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0)
 mesh = SubResource("BoxMesh_j115u")
 
-[node name="BarraVidaRelleno" type="MeshInstance3D" parent="." unique_id=357178761]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0)
-mesh = SubResource("BoxMesh_e5ioe")
+[node name="BarraVidaRelleno" type="MeshInstance3D" parent="." unique_id=551157868]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0.04)
+material_override = SubResource("StandardMaterial3D_excdm")
+mesh = SubResource("BoxMesh_whuy3")
