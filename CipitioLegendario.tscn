@@ -1,0 +1,148 @@
+[gd_scene format=3 uid="uid://bt1mx3xu1hgcf"]
+
+[ext_resource type="Script" uid="uid://dxu1mow51cy64" path="res://CipitioLegendario.gd" id="1_7uc5s"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7uc5s"]
+albedo_color = Color(0.1882353, 0.27058825, 0.16862746, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_j115u"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tbfvk"]
+albedo_color = Color(0.38039216, 0.4509804, 0.29411766, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_e5ioe"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aej15"]
+albedo_color = Color(0.6117647, 0.4745098, 0.23529412, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_whuy3"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hvlbp"]
+radius = 0.9
+height = 3.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eaagd"]
+albedo_color = Color(0.827451, 0.18431373, 0.18431373, 1)
+emission_enabled = true
+emission = Color(0.827451, 0.18431373, 0.18431373, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_j115u"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cghda"]
+albedo_color = Color(0.827451, 0.18431373, 0.18431373, 1)
+emission_enabled = true
+emission = Color(0.827451, 0.18431373, 0.18431373, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_whuy3"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hiy5x"]
+albedo_color = Color(0.1882353, 0.27058825, 0.16862746, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_7uc5s"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rb7ls"]
+albedo_color = Color(0.1882353, 0.27058825, 0.16862746, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_tbfvk"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_80tn5"]
+albedo_color = Color(0.1882353, 0.27058825, 0.16862746, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_aej15"]
+radius = 0.35
+height = 1.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_toffb"]
+albedo_color = Color(0.1882353, 0.27058825, 0.16862746, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_whuy3"]
+radius = 0.35
+height = 1.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_whuy3"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j115u"]
+material = SubResource("StandardMaterial3D_whuy3")
+size = Vector3(2.4, 0.15, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hvlbp"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_e5ioe"]
+material = SubResource("StandardMaterial3D_hvlbp")
+size = Vector3(2.3, 0.1, 0.06)
+
+[node name="CipitioLegendario" type="CharacterBody3D" unique_id=1947435142]
+script = ExtResource("1_7uc5s")
+
+[node name="Cuerpo" type="MeshInstance3D" parent="." unique_id=441239813]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 1.8, 0)
+material_override = SubResource("StandardMaterial3D_7uc5s")
+mesh = SubResource("CapsuleMesh_j115u")
+
+[node name="Cabeza" type="MeshInstance3D" parent="." unique_id=351260229]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 0, 3.1, 0)
+material_override = SubResource("StandardMaterial3D_tbfvk")
+mesh = SubResource("SphereMesh_e5ioe")
+
+[node name="Sombrero" type="MeshInstance3D" parent="." unique_id=2105889881]
+transform = Transform3D(2.3, 0, 0, 0, 0.2, 0, 0, 0, 2.3, 0, 3.75, 0)
+material_override = SubResource("StandardMaterial3D_aej15")
+mesh = SubResource("CylinderMesh_whuy3")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=197774798]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+shape = SubResource("CapsuleShape3D_hvlbp")
+
+[node name="VidaLabel" type="Label3D" parent="." unique_id=654246105]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.8, 0)
+billboard = 1
+text = "CIPITÍO LEGENDARIO"
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1170527984]
+transform = Transform3D(0.8660254, -0.35355338, 0.35355338, 0, 0.70710677, 0.70710677, -0.5, -0.6123724, 0.6123724, 0, 0, 0)
+
+[node name="CamaraPrueba" type="Camera3D" parent="DirectionalLight3D" unique_id=1697863181]
+transform = Transform3D(0.9993908, -0.011936322, 0.032794803, 0.024677634, 0.9061604, -0.4222135, -0.024677634, 0.42276555, 0.90590304, -0.4019239, -2.2600207, 7.2097683)
+current = true
+
+[node name="OjoIzquierdo" type="MeshInstance3D" parent="." unique_id=1915311589]
+transform = Transform3D(0.13, 0, 0, 0, 0.13, 0, 0, 0, 0.13, -0.25, 3.15, 0.55)
+material_override = SubResource("StandardMaterial3D_eaagd")
+mesh = SubResource("SphereMesh_j115u")
+
+[node name="OjoDerecho" type="MeshInstance3D" parent="." unique_id=1797728014]
+transform = Transform3D(0.13, 0, 0, 0, 0.13, 0, 0, 0, 0.13, 0.25, 3.15, 0.55)
+material_override = SubResource("StandardMaterial3D_cghda")
+mesh = SubResource("SphereMesh_whuy3")
+
+[node name="BrazoIzquierdo" type="MeshInstance3D" parent="." unique_id=1080695523]
+transform = Transform3D(0.31720772, 0.35922554, 0, -0.14791639, 0.7703616, 0, 0, 0, 0.35, -0.95, 1.6, 0)
+material_override = SubResource("StandardMaterial3D_hiy5x")
+mesh = SubResource("CapsuleMesh_7uc5s")
+
+[node name="BrazoDerecho" type="MeshInstance3D" parent="." unique_id=501272472]
+transform = Transform3D(0.31720772, -0.35922554, 0, 0.14791639, 0.7703616, 0, 0, 0, 0.35, 0.95, 1.6, 0)
+material_override = SubResource("StandardMaterial3D_rb7ls")
+mesh = SubResource("CapsuleMesh_tbfvk")
+
+[node name="PiernaIzquierda" type="MeshInstance3D" parent="." unique_id=1430986214]
+transform = Transform3D(0.6, 0, 0, 0, 0.8, 0, 0, 0, 0.6, -0.45, 0.35, 0)
+material_override = SubResource("StandardMaterial3D_80tn5")
+mesh = SubResource("CapsuleMesh_aej15")
+
+[node name="PiernaDerecha" type="MeshInstance3D" parent="." unique_id=1396487630]
+transform = Transform3D(0.6, 0, 0, 0, 0.8, 0, 0, 0, 0.6, 0.45, 0.35, 0)
+material_override = SubResource("StandardMaterial3D_toffb")
+mesh = SubResource("CapsuleMesh_whuy3")
+
+[node name="BarraVidaFondo" type="MeshInstance3D" parent="." unique_id=1367905222]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0)
+mesh = SubResource("BoxMesh_j115u")
+
+[node name="BarraVidaRelleno" type="MeshInstance3D" parent="." unique_id=357178761]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0)
+mesh = SubResource("BoxMesh_e5ioe")
