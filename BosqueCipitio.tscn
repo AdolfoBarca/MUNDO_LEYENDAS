@@ -1,10 +1,178 @@
 [gd_scene format=3 uid="uid://03wpxyoc2v8r"]
 
 [ext_resource type="Script" uid="uid://bdyg5cru0wy0y" path="res://BosqueCipitio.gd" id="1_q5s55"]
+[ext_resource type="Script" uid="uid://ba1n56m0xsuw4" path="res://Heroe.gd" id="2_wr3ut"]
+[ext_resource type="Material" uid="uid://b4lcoj1mqmhph" path="res://MaterialPiel.tres" id="3_4ut1j"]
+[ext_resource type="Material" uid="uid://c2y66k080fws6" path="res://MaterialPantalon.tres" id="4_q7ad5"]
+[ext_resource type="Script" uid="uid://cgi425hsbbcrs" path="res://Camara.gd" id="5_0nubu"]
+[ext_resource type="Script" uid="uid://b0khvsy334yjx" path="res://HUDInventario.gd" id="6_71d4f"]
+[ext_resource type="Script" uid="uid://cokjaukgd33hs" path="res://SantuarioCheckpoint.gd" id="7_4ut1j"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_4nkgc"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8whyg"]
+albedo_color = Color(0.14117648, 0.2901961, 0.4509804, 1)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dsagx"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yojx1"]
+size = Vector3(1.5, 1.5, 2)
+
+[sub_resource type="SphereMesh" id="SphereMesh_8vj5y"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_s53te"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_cuu33"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_4ut1j"]
+radius = 3.0
 
 [node name="BosqueCipitio" type="Node3D" unique_id=170418784]
 script = ExtResource("1_q5s55")
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1318424998]
-transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 65, 65)
+[node name="Heroe" type="CharacterBody3D" parent="." unique_id=598350122 groups=["heroe"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 40)
+script = ExtResource("2_wr3ut")
+
+[node name="Cuerpo" type="MeshInstance3D" parent="Heroe" unique_id=2147222209]
+mesh = SubResource("CapsuleMesh_4nkgc")
+surface_material_override/0 = SubResource("StandardMaterial3D_8whyg")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Heroe" unique_id=325498947]
+shape = SubResource("CapsuleShape3D_dsagx")
+
+[node name="AreaAtaque" type="Area3D" parent="Heroe" unique_id=1010711000]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -1.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Heroe/AreaAtaque" unique_id=925449756]
+shape = SubResource("BoxShape3D_yojx1")
+
+[node name="Cabeza" type="MeshInstance3D" parent="Heroe" unique_id=1218141408]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
+mesh = SubResource("SphereMesh_8vj5y")
+surface_material_override/0 = ExtResource("3_4ut1j")
+
+[node name="BrazoIzquierdo" type="MeshInstance3D" parent="Heroe" unique_id=83933960]
+transform = Transform3D(0.35, 0, 0, 0, 0.7, 0, 0, 0, 0.35, -0.65, 0.45, 0)
+mesh = SubResource("CapsuleMesh_s53te")
+surface_material_override/0 = ExtResource("3_4ut1j")
+
+[node name="BrazoDerecho" type="MeshInstance3D" parent="Heroe" unique_id=2128842693]
+transform = Transform3D(0.35, 0, 0, 0, 0.7, 0, 0, 0, 0.35, 0.65, 0.45, 0)
+mesh = SubResource("CapsuleMesh_s53te")
+surface_material_override/0 = ExtResource("3_4ut1j")
+
+[node name="PiernaIzquierda" type="MeshInstance3D" parent="Heroe" unique_id=661157205]
+transform = Transform3D(0.4, 0, 0, 0, 0.65, 0, 0, 0, 0.4, -0.27, -0.85, 0)
+mesh = SubResource("CapsuleMesh_cuu33")
+surface_material_override/0 = ExtResource("4_q7ad5")
+
+[node name="PiernaDerecha" type="MeshInstance3D" parent="Heroe" unique_id=260707546]
+transform = Transform3D(0.4, 0, 0, 0, 0.65, 0, 0, 0, 0.4, 0.27, -0.85, 0)
+mesh = SubResource("CapsuleMesh_cuu33")
+surface_material_override/0 = ExtResource("4_q7ad5")
+
+[node name="NombreHeroe" type="Label3D" parent="Heroe" unique_id=209727319]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+billboard = 1
+outline_size = 6
+
+[node name="Camara" type="Camera3D" parent="." unique_id=2031174738]
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 1, 5, 8, 5)
 current = true
+script = ExtResource("5_0nubu")
+
+[node name="Interfaz" type="CanvasLayer" parent="." unique_id=1350885661]
+
+[node name="BarraVida" type="ProgressBar" parent="Interfaz" unique_id=856812654]
+offset_left = 30.0
+offset_top = 45.0
+offset_right = 280.0
+offset_bottom = 75.0
+value = 100.0
+
+[node name="TextoVida" type="Label" parent="Interfaz" unique_id=602367426]
+offset_left = 30.0
+offset_top = 20.0
+offset_right = 70.0
+offset_bottom = 43.0
+
+[node name="TextoNivel" type="Label" parent="Interfaz" unique_id=1999654562]
+offset_left = 30.0
+offset_top = 85.0
+offset_right = 70.0
+offset_bottom = 108.0
+
+[node name="TextoExperiencia" type="Label" parent="Interfaz" unique_id=1745666277]
+offset_left = 30.0
+offset_top = 110.0
+offset_right = 70.0
+offset_bottom = 133.0
+
+[node name="BarraExperiencia" type="ProgressBar" parent="Interfaz" unique_id=822688927]
+offset_left = 30.0
+offset_top = 135.0
+offset_right = 280.0
+offset_bottom = 162.0
+
+[node name="TextoDerrota" type="Label" parent="Interfaz" unique_id=354716303]
+visible = false
+offset_right = 40.0
+offset_bottom = 23.0
+text = "HAS SIDO DERROTADO"
+
+[node name="PuntoRespawn" type="Marker3D" parent="." unique_id=436642509]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 43)
+
+[node name="HUDInventario" type="CanvasLayer" parent="." unique_id=2119749119]
+script = ExtResource("6_71d4f")
+
+[node name="PanelInventario" type="Panel" parent="HUDInventario" unique_id=1920226659]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -402.0
+offset_top = 20.0
+offset_right = -2.0
+offset_bottom = 320.0
+grow_horizontal = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="TituloInventario" type="Label" parent="HUDInventario/PanelInventario" unique_id=1499287857]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 10.0
+offset_right = 112.0
+offset_bottom = 33.0
+text = "INVENTARIO"
+
+[node name="FragmentosLabel" type="Label" parent="HUDInventario/PanelInventario" unique_id=1714739957]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 45.0
+offset_right = 211.0
+offset_bottom = 68.0
+text = "Fragmentos de esencia: 0"
+
+[node name="BotonCerrar" type="Button" parent="HUDInventario/PanelInventario" unique_id=2079775289]
+layout_mode = 0
+offset_left = 365.0
+offset_top = 5.0
+offset_right = 395.0
+offset_bottom = 36.0
+text = "X"
+
+[node name="GridObjetos" type="GridContainer" parent="HUDInventario/PanelInventario" unique_id=978679148]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 70.0
+offset_right = 385.0
+offset_bottom = 280.0
+columns = 4
+
+[node name="SantuarioCheckpoint" type="Area3D" parent="." unique_id=1145168136]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 5)
+script = ExtResource("7_4ut1j")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SantuarioCheckpoint" unique_id=356230784]
+shape = SubResource("SphereShape3D_4ut1j")
