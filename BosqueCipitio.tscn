@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://cgi425hsbbcrs" path="res://Camara.gd" id="5_0nubu"]
 [ext_resource type="Script" uid="uid://b0khvsy334yjx" path="res://HUDInventario.gd" id="6_71d4f"]
 [ext_resource type="Script" uid="uid://cokjaukgd33hs" path="res://SantuarioCheckpoint.gd" id="7_4ut1j"]
+[ext_resource type="PackedScene" uid="uid://c320vyayp7dqi" path="res://MiniCipitio.tscn" id="8_q7ad5"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_4nkgc"]
 
@@ -176,3 +177,14 @@ script = ExtResource("7_4ut1j")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SantuarioCheckpoint" unique_id=356230784]
 shape = SubResource("SphereShape3D_4ut1j")
+
+[node name="Guardianes" type="Node3D" parent="." unique_id=244061562]
+
+[node name="Guardian1" parent="Guardianes" unique_id=2010731475 instance=ExtResource("8_q7ad5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1, 27)
+
+[node name="Guardian2" parent="Guardianes" unique_id=2075037303 instance=ExtResource("8_q7ad5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1, -8)
+
+[node name="Guardian3" parent="Guardianes" unique_id=1100180862 instance=ExtResource("8_q7ad5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -19)
