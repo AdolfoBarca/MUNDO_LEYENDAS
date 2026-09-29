@@ -63,14 +63,18 @@ radius = 0.35
 height = 1.5
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_whuy3"]
+shading_mode = 0
 albedo_color = Color(0, 0, 0, 1)
+billboard_mode = 1
 
 [sub_resource type="BoxMesh" id="BoxMesh_j115u"]
 material = SubResource("StandardMaterial3D_whuy3")
 size = Vector3(2.4, 0.15, 0.05)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_excdm"]
+shading_mode = 0
 albedo_color = Color(1, 0, 0, 1)
+billboard_mode = 1
 
 [sub_resource type="BoxMesh" id="BoxMesh_whuy3"]
 size = Vector3(2.3, 0.1, 0.06)
@@ -98,7 +102,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
 shape = SubResource("CapsuleShape3D_hvlbp")
 
 [node name="VidaLabel" type="Label3D" parent="." unique_id=654246105]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.15, 0)
 billboard = 1
 text = "CIPITÍO LEGENDARIO"
 
