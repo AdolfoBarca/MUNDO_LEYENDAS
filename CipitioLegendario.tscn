@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bt1mx3xu1hgcf"]
 
 [ext_resource type="Script" uid="uid://dxu1mow51cy64" path="res://CipitioLegendario.gd" id="1_7uc5s"]
+[ext_resource type="Script" uid="uid://d0qkxc03o7kep" path="res://SistemaDrops.gd" id="2_tbfvk"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7uc5s"]
 albedo_color = Color(0.1882353, 0.27058825, 0.16862746, 1)
@@ -139,3 +140,6 @@ mesh = SubResource("BoxMesh_j115u")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0.04)
 material_override = SubResource("StandardMaterial3D_excdm")
 mesh = SubResource("BoxMesh_whuy3")
+
+[node name="SistemaDrops" type="Node" parent="." unique_id=574641164]
+script = ExtResource("2_tbfvk")
