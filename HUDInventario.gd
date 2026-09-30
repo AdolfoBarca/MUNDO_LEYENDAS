@@ -34,6 +34,17 @@ var filtro_actual: String = "Todos"
 
 
 # =========================================================
+# COLORES DE PESTAÑAS
+# =========================================================
+
+var color_pestana_normal := Color(0.08, 0.08, 0.08, 0.78)
+var color_pestana_activa := Color(0.25, 0.38, 0.25, 0.95)
+
+var color_borde_normal := Color(0.20, 0.20, 0.20, 0.80)
+var color_borde_activo := Color(0.55, 0.85, 0.55, 1.0)
+
+
+# =========================================================
 # INICIO
 # =========================================================
 
@@ -110,6 +121,7 @@ func _ready() -> void:
 	grid_objetos.columns = 6
 
 	actualizar_inventario()
+	actualizar_estilo_pestanas()
 
 
 # =========================================================
@@ -141,6 +153,7 @@ func abrir_inventario() -> void:
 	filtro_actual = "Todos"
 
 	actualizar_inventario()
+	actualizar_estilo_pestanas()
 
 	panel_inventario.visible = true
 
@@ -167,10 +180,111 @@ func cambiar_filtro(nuevo_filtro: String) -> void:
 	filtro_actual = nuevo_filtro
 
 	actualizar_inventario()
+	actualizar_estilo_pestanas()
 
 	# Volver al inicio al cambiar de categoría.
 	scroll_objetos.scroll_vertical = 0
 	scroll_objetos.scroll_horizontal = 0
+
+
+# =========================================================
+# ESTILO DE PESTAÑAS
+# =========================================================
+
+func actualizar_estilo_pestanas() -> void:
+
+	aplicar_estilo_pestana(
+		boton_todos,
+		filtro_actual == "Todos"
+	)
+
+	aplicar_estilo_pestana(
+		boton_materiales,
+		filtro_actual == "Material"
+	)
+
+	aplicar_estilo_pestana(
+		boton_consumibles,
+		filtro_actual == "Consumible"
+	)
+
+	aplicar_estilo_pestana(
+		boton_equipo,
+		filtro_actual == "Equipamiento"
+	)
+
+	aplicar_estilo_pestana(
+		boton_legendarios,
+		filtro_actual == "Legendario"
+	)
+
+
+func aplicar_estilo_pestana(
+	boton: Button,
+	seleccionado: bool
+) -> void:
+
+	var estilo := StyleBoxFlat.new()
+
+	if seleccionado:
+		estilo.bg_color = color_pestana_activa
+		estilo.border_color = color_borde_activo
+		estilo.set_border_width_all(2)
+
+		boton.add_theme_color_override(
+			"font_color",
+			Color.WHITE
+		)
+
+	else:
+		estilo.bg_color = color_pestana_normal
+		estilo.border_color = color_borde_normal
+		estilo.set_border_width_all(1)
+
+		boton.add_theme_color_override(
+			"font_color",
+			Color(0.85, 0.85, 0.85, 1.0)
+		)
+
+	estilo.corner_radius_top_left = 5
+	estilo.corner_radius_top_right = 5
+	estilo.corner_radius_bottom_left = 5
+	estilo.corner_radius_bottom_right = 5
+
+	boton.add_theme_stylebox_override(
+		"normal",
+		estilo
+	)
+
+	# Mantener visible la selección al pasar el mouse.
+	if seleccionado:
+		var hover_activo := estilo.duplicate()
+
+		hover_activo.bg_color = Color(
+			0.30,
+			0.45,
+			0.30,
+			1.0
+		)
+
+		boton.add_theme_stylebox_override(
+			"hover",
+			hover_activo
+		)
+	else:
+		var hover_normal := estilo.duplicate()
+
+		hover_normal.bg_color = Color(
+			0.15,
+			0.15,
+			0.15,
+			0.90
+		)
+
+		boton.add_theme_stylebox_override(
+			"hover",
+			hover_normal
+		)
 
 
 # =========================================================
