@@ -1,6 +1,7 @@
 extends Node
 
 signal inventario_actualizado
+signal objeto_obtenido(id_objeto: String, cantidad: int)
 
 
 # =========================================================
@@ -214,6 +215,16 @@ func agregar_objeto(
 	# =====================================================
 
 	inventario_actualizado.emit()
+
+
+	# =====================================================
+	# AVISAR QUÉ OBJETO SE OBTUVO
+	# =====================================================
+
+	objeto_obtenido.emit(
+		id_objeto,
+		cantidad
+	)
 
 
 # =========================================================

@@ -207,6 +207,15 @@ offset_bottom = 560.0
 layout_mode = 2
 columns = 3
 
+[node name="PanelObjetosObtenidos" type="PanelContainer" parent="HUDInventario" unique_id=1330236574]
+offset_left = 30.0
+offset_top = 430.0
+offset_right = 420.0
+offset_bottom = 610.0
+
+[node name="ListaObjetos" type="VBoxContainer" parent="HUDInventario/PanelObjetosObtenidos" unique_id=1795465560]
+layout_mode = 2
+
 [node name="SantuarioCheckpoint" type="Area3D" parent="." unique_id=1145168136]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 5)
 script = ExtResource("7_4ut1j")
