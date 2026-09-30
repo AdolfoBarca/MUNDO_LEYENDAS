@@ -55,12 +55,22 @@ albedo_color = Color(0.1882353, 0.27058825, 0.16862746, 1)
 radius = 0.35
 height = 1.5
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ab6dc"]
+albedo_color = Color(0.14901961, 0.23921569, 0.15686275, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_e5ioe"]
+radius = 0.3
+height = 1.0
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_toffb"]
 albedo_color = Color(0.1882353, 0.27058825, 0.16862746, 1)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_whuy3"]
 radius = 0.35
 height = 1.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pwfqj"]
+albedo_color = Color(0.14901961, 0.23921569, 0.15686275, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_whuy3"]
 shading_mode = 0
@@ -107,12 +117,12 @@ billboard = 1
 text = "CIPITÍO LEGENDARIO"
 
 [node name="OjoIzquierdo" type="MeshInstance3D" parent="." unique_id=1915311589]
-transform = Transform3D(0.13, 0, 0, 0, 0.13, 0, 0, 0, 0.13, -0.25, 3.15, 0.55)
+transform = Transform3D(0.13, 0, 0, 0, 0.13, 0, 0, 0, 0.13, -0.25, 3.15, -0.55)
 material_override = SubResource("StandardMaterial3D_eaagd")
 mesh = SubResource("SphereMesh_j115u")
 
 [node name="OjoDerecho" type="MeshInstance3D" parent="." unique_id=1797728014]
-transform = Transform3D(0.13, 0, 0, 0, 0.13, 0, 0, 0, 0.13, 0.25, 3.15, 0.55)
+transform = Transform3D(0.13, 0, 0, 0, 0.13, 0, 0, 0, 0.13, 0.25, 3.15, -0.55)
 material_override = SubResource("StandardMaterial3D_cghda")
 mesh = SubResource("SphereMesh_whuy3")
 
@@ -131,10 +141,20 @@ transform = Transform3D(0.6, 0, 0, 0, 0.8, 0, 0, 0, 0.6, -0.45, 0.35, 0)
 material_override = SubResource("StandardMaterial3D_80tn5")
 mesh = SubResource("CapsuleMesh_aej15")
 
+[node name="PieIzquierdo" type="MeshInstance3D" parent="PiernaIzquierda" unique_id=1820780785]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, -0.38, 0.28)
+material_override = SubResource("StandardMaterial3D_ab6dc")
+mesh = SubResource("CapsuleMesh_e5ioe")
+
 [node name="PiernaDerecha" type="MeshInstance3D" parent="." unique_id=1396487630]
 transform = Transform3D(0.6, 0, 0, 0, 0.8, 0, 0, 0, 0.6, 0.45, 0.35, 0)
 material_override = SubResource("StandardMaterial3D_toffb")
 mesh = SubResource("CapsuleMesh_whuy3")
+
+[node name="PieDerecho" type="MeshInstance3D" parent="PiernaDerecha" unique_id=379529056]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, -0.38, 0.28)
+material_override = SubResource("StandardMaterial3D_pwfqj")
+mesh = SubResource("CapsuleMesh_e5ioe")
 
 [node name="BarraVidaFondo" type="MeshInstance3D" parent="." unique_id=1367905222]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0)
