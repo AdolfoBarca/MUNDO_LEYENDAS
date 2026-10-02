@@ -24,7 +24,7 @@ var catalogo_objetos: Dictionary = {
     "corazon_cipitio": {"nombre": "Corazón del Cipitío", "tipo": "Material", "rareza": "Legendario", "descripcion": "Corazón mágico obtenido al derrotar al Cipitío Legendario.", "icono": "res://iconos/corazon_cipitio.png"},
     "ceniza_ancestral": {"nombre": "Ceniza ancestral", "tipo": "Material", "rareza": "Legendario", "descripcion": "Ceniza sobrenatural concentrada del Cipitío Legendario.", "icono": "res://iconos/ceniza_ancestral.png"},
     "tecomate_espiritus": {"nombre": "Tecomate de los Espíritus", "tipo": "Equipamiento", "rareza": "Legendario", "descripcion": "Recipiente encantado que permitirá capturar e invocar compañeros.", "icono": "res://iconos/tecomate_espiritus.png"},
-    "carta_ceniza_cipitio": {"nombre": "Carta: Ceniza del Cipitío", "tipo": "Carta", "rareza": "Legendario", "descripcion": "Reúne 100 cenizas ancestrales para desbloquear su habilidad. La carta se conserva y después podrás equiparla en tus guantes.", "icono": "res://iconos/carta_ceniza_cipitio_icono.png"}
+    "carta_ceniza_cipitio": {"nombre": "Carta: Ceniza del Cipitío", "tipo": "Carta", "rareza": "Legendario", "descripcion": "Consume 100 cenizas ancestrales para desbloquear su habilidad. La carta se conserva y después podrás equiparla en tus guantes.", "icono": "res://iconos/carta_ceniza_cipitio_icono.png"}
 }
 
 var fragmentos_esencia: int = 0
@@ -33,6 +33,7 @@ var cartas_desbloqueadas: Dictionary = {}
 var inventario: Dictionary = {
     "fragmento_esencia": {"nombre": "Fragmento de esencia", "tipo": "Material", "cantidad": 0, "rareza": "Común", "descripcion": "Fragmento de energía obtenido de criaturas.", "icono": "res://iconos/fragmento_esencia.png"}
 }
+
 
 func asignar_region_y_afinidad() -> void:
     var centroamerica: Array = ["El Salvador", "Guatemala", "Honduras", "Nicaragua", "Costa Rica", "Panamá", "Belice"]
@@ -113,9 +114,12 @@ func puede_desbloquear_ceniza_cipitio() -> bool:
 func desbloquear_ceniza_cipitio() -> bool:
     if not puede_desbloquear_ceniza_cipitio():
         return false
+    # Se consumen las cenizas, pero nunca la carta.
     if not consumir_objeto("ceniza_ancestral", COSTO_CENIZA_CIPITIO):
         return false
     cartas_desbloqueadas[ID_CARTA_CENIZA] = true
     inventario_actualizado.emit()
     carta_desbloqueada.emit(ID_CARTA_CENIZA)
+    print("CARTA DESBLOQUEADA: Ceniza del Cipitío")
+    print("Cenizas consumidas: ", COSTO_CENIZA_CIPITIO)
     return true
