@@ -22,6 +22,7 @@ const SLOT_INVENTARIO = preload("res://SlotInventario.tscn")
 # FILTRO ACTUAL
 # =========================================================
 var filtro_actual: String = "Todos"
+var historial_visible_antes_de_abrir: bool = true
 # Ventana de inspección, creada sin modificar la escena.
 var capa_detalles: Control
 var imagen_detalle: TextureRect
@@ -32,6 +33,8 @@ var zoom_detalle: float = 1.0
 var tamano_imagen_base: Vector2 = Vector2(480, 480)
 var scroll_detalles: ScrollContainer
 var scroll_avisos: ScrollContainer
+var boton_desbloquear: Button
+var objeto_detalle_actual: Dictionary = {}
 var panel_detalles: PanelContainer
 # =========================================================
 # COLORES DE PESTAÑAS
@@ -111,7 +114,15 @@ func _ready() -> void:
 	# =====================================================
 	# CONFIGURAR CUADRÍCULA
 	# =====================================================
-	grid_objetos.columns = 6
+	grid_objetos.columns = 8
+	# El ScrollContainer mantiene las casillas dentro del panel.
+	scroll_objetos.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll_objetos.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll_objetos.clip_contents = true
+	scroll_objetos.anchor_bottom = 1.0
+	scroll_objetos.offset_bottom = -16.0
+	scroll_objetos.custom_minimum_size.y = 0.0
+	grid_objetos.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actualizar_inventario()
 	actualizar_estilo_pestanas()
 	crear_ventana_detalles()
@@ -139,7 +150,10 @@ func abrir_inventario() -> void:
 	filtro_actual = "Todos"
 	actualizar_inventario()
 	actualizar_estilo_pestanas()
+	historial_visible_antes_de_abrir = panel_objetos_obtenidos.visible
+	panel_objetos_obtenidos.visible = false
 	panel_inventario.visible = true
+	scroll_objetos.scroll_vertical = 0
 	get_tree().paused = true
 # =========================================================
 # CERRAR INVENTARIO
@@ -147,6 +161,7 @@ func abrir_inventario() -> void:
 func cerrar_inventario() -> void:
 	cerrar_detalles()
 	panel_inventario.visible = false
+	panel_objetos_obtenidos.visible = historial_visible_antes_de_abrir
 	get_tree().paused = false
 # =========================================================
 # CAMBIAR FILTRO
@@ -287,7 +302,6 @@ func mostrar_objeto_obtenido(
 	)
 	margen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lista_objetos.add_child(margen)
-	lista_objetos.move_child(margen, 0)
 	# =====================================================
 	# FILA PRINCIPAL
 	# =====================================================
@@ -357,14 +371,22 @@ func mostrar_objeto_obtenido(
 	# LIMITAR AVISOS
 	# =====================================================
 	while lista_objetos.get_child_count() > MAX_AVISOS:
-		var aviso_antiguo := lista_objetos.get_child(lista_objetos.get_child_count() - 1)
+		var aviso_antiguo := lista_objetos.get_child(0)
 		lista_objetos.remove_child(aviso_antiguo)
 		aviso_antiguo.queue_free()
 	# =====================================================
 	# El historial permanece disponible hasta llegar a MAX_AVISOS.
-	# Los mensajes nuevos aparecen arriba.
+	# Los mensajes nuevos aparecen abajo y el historial los sigue.
 	if scroll_avisos != null:
-		scroll_avisos.scroll_vertical = 0
+		desplazar_historial_al_final()
+# Esperar a que los controles calculen su altura antes de bajar.
+func desplazar_historial_al_final() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if not is_instance_valid(scroll_avisos):
+		return
+	var barra: VScrollBar = scroll_avisos.get_v_scroll_bar()
+	scroll_avisos.scroll_vertical = int(maxf(0.0, barra.max_value - barra.page))
 
 # =========================================================
 # HISTORIAL DESPLAZABLE DE RECOMPENSAS
@@ -391,7 +413,6 @@ func configurar_historial_avisos() -> void:
 	lista_objetos.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# Si la escena ya tiene tamaño fijo, lo respetamos.
 	panel_objetos_obtenidos.custom_minimum_size.y = maxf(panel_objetos_obtenidos.custom_minimum_size.y, 145.0)
-
 # =========================================================
 # ACTUALIZAR INVENTARIO
 # =========================================================
@@ -478,18 +499,15 @@ func crear_ventana_detalles() -> void:
 	capa_detalles.mouse_filter = Control.MOUSE_FILTER_STOP
 	capa_detalles.visible = false
 	add_child(capa_detalles)
-
 	var fondo := ColorRect.new()
 	fondo.color = Color(0.0, 0.0, 0.0, 0.86)
 	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fondo.mouse_filter = Control.MOUSE_FILTER_STOP
 	capa_detalles.add_child(fondo)
-
 	var centro := CenterContainer.new()
 	centro.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	centro.mouse_filter = Control.MOUSE_FILTER_PASS
 	capa_detalles.add_child(centro)
-
 	panel_detalles = PanelContainer.new()
 	panel_detalles.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	panel_detalles.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -501,11 +519,9 @@ func crear_ventana_detalles() -> void:
 	estilo.set_content_margin_all(14)
 	panel_detalles.add_theme_stylebox_override("panel", estilo)
 	centro.add_child(panel_detalles)
-
 	var columna := VBoxContainer.new()
 	columna.add_theme_constant_override("separation", 8)
 	panel_detalles.add_child(columna)
-
 	var encabezado := HBoxContainer.new()
 	columna.add_child(encabezado)
 	nombre_detalle = Label.new()
@@ -519,19 +535,16 @@ func crear_ventana_detalles() -> void:
 	cerrar.custom_minimum_size = Vector2(42, 42)
 	cerrar.pressed.connect(cerrar_detalles)
 	encabezado.add_child(cerrar)
-
 	scroll_detalles = ScrollContainer.new()
 	scroll_detalles.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll_detalles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll_detalles.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	scroll_detalles.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	columna.add_child(scroll_detalles)
-
 	var contenido := VBoxContainer.new()
 	contenido.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	contenido.add_theme_constant_override("separation", 12)
 	scroll_detalles.add_child(contenido)
-
 	var centro_imagen := CenterContainer.new()
 	centro_imagen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	contenido.add_child(centro_imagen)
@@ -541,7 +554,6 @@ func crear_ventana_detalles() -> void:
 	imagen_detalle.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	imagen_detalle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	centro_imagen.add_child(imagen_detalle)
-
 	var controles_zoom := HBoxContainer.new()
 	controles_zoom.alignment = BoxContainer.ALIGNMENT_CENTER
 	contenido.add_child(controles_zoom)
@@ -559,13 +571,17 @@ func crear_ventana_detalles() -> void:
 	acercar.custom_minimum_size = Vector2(52, 40)
 	acercar.pressed.connect(func() -> void: cambiar_zoom(0.25))
 	controles_zoom.add_child(acercar)
-
 	informacion_detalle = Label.new()
 	informacion_detalle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	informacion_detalle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	informacion_detalle.add_theme_font_size_override("font_size", 16)
 	contenido.add_child(informacion_detalle)
-
+	boton_desbloquear = Button.new()
+	boton_desbloquear.text = "Desbloquear por 100 cenizas ancestrales"
+	boton_desbloquear.custom_minimum_size = Vector2(0, 48)
+	boton_desbloquear.visible = false
+	boton_desbloquear.pressed.connect(intentar_desbloquear_carta)
+	contenido.add_child(boton_desbloquear)
 	# Tamaño inicial adaptado a la resolución del juego.
 	var pantalla: Vector2 = get_viewport().get_visible_rect().size
 	panel_detalles.custom_minimum_size = Vector2(
@@ -573,10 +589,10 @@ func crear_ventana_detalles() -> void:
 		maxf(320.0, pantalla.y * 0.88)
 	)
 	scroll_detalles.custom_minimum_size = Vector2(0.0, maxf(200.0, pantalla.y * 0.70))
-
 func mostrar_detalles(objeto: Dictionary) -> void:
 	if capa_detalles == null:
 		return
+	objeto_detalle_actual = objeto.duplicate(true)
 	nombre_detalle.text = str(objeto.get("nombre", "Objeto"))
 	var ruta: String = str(objeto.get("icono", ""))
 	# La casilla usa la ilustración recortada; la inspección usa la carta completa.
@@ -613,6 +629,17 @@ func mostrar_detalles(objeto: Dictionary) -> void:
 		texto += "\nRecarga: 20 segundos"
 		texto += "\nCosto: 30 PE"
 		texto += "\nDesbloqueo: 100 cenizas ancestrales (la carta se conserva)"
+	if nombre_detalle.text == "Carta: Ceniza del Cipitío":
+		var cantidad_ceniza: int = DatosJugador.obtener_cantidad_objeto("ceniza_ancestral")
+		if DatosJugador.carta_esta_desbloqueada("carta_ceniza_cipitio"):
+			texto += "\n\nESTADO: DESBLOQUEADA. Disponible para equipar en guantes cuando esté implementado el sistema de equipamiento."
+			boton_desbloquear.visible = false
+		else:
+			texto += "\n\nProgreso: %d / 100 cenizas ancestrales" % cantidad_ceniza
+			boton_desbloquear.visible = true
+			boton_desbloquear.disabled = not DatosJugador.puede_desbloquear_ceniza_cipitio()
+	else:
+		boton_desbloquear.visible = false
 	informacion_detalle.text = texto
 	capa_detalles.visible = true
 	if scroll_detalles != null:
@@ -629,3 +656,10 @@ func establecer_zoom(nuevo_zoom: float) -> void:
 func cerrar_detalles() -> void:
 	if capa_detalles != null:
 		capa_detalles.visible = false
+
+func intentar_desbloquear_carta() -> void:
+	if DatosJugador.desbloquear_ceniza_cipitio():
+		mostrar_detalles(DatosJugador.obtener_objeto("carta_ceniza_cipitio"))
+	else:
+		if not objeto_detalle_actual.is_empty():
+			mostrar_detalles(objeto_detalle_actual)
