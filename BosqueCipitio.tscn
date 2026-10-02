@@ -236,3 +236,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1, -15)
 
 [node name="CipitioLegendario" parent="." unique_id=1947435142 instance=ExtResource("9_0nubu")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, -35)
+vida_maxima = 100
+probabilidad_tecomate = 1.0
+probabilidad_carta = 1.0
