@@ -69,6 +69,13 @@ var scroll_detalles: ScrollContainer
 var scroll_avisos: ScrollContainer
 
 var boton_desbloquear: Button
+var boton_equipar_carta: Button
+var panel_ranura_guantes: HBoxContainer
+var icono_ranura_guantes: TextureRect
+var texto_ranura_guantes: Label
+var selector_guantes: OptionButton
+var boton_poner_guantes: Button
+var boton_refinar_guantes: Button
 
 var objeto_detalle_actual: Dictionary = {}
 
@@ -1166,6 +1173,68 @@ func crear_ventana_detalles() -> void:
 
     contenido.add_child(boton_desbloquear)
 
+    boton_equipar_carta = Button.new()
+    boton_equipar_carta.text = "Equipar en guantes"
+    boton_equipar_carta.custom_minimum_size = Vector2(0, 48)
+    boton_equipar_carta.visible = false
+    boton_equipar_carta.pressed.connect(alternar_equipamiento_carta)
+    contenido.add_child(boton_equipar_carta)
+
+    selector_guantes = OptionButton.new()
+    selector_guantes.visible = false
+    selector_guantes.custom_minimum_size = Vector2(0, 42)
+    selector_guantes.item_selected.connect(func(indice: int) -> void:
+        DatosJugador.seleccionar_guantes(str(selector_guantes.get_item_metadata(indice)))
+        mostrar_detalles(DatosJugador.obtener_objeto(DatosJugador.ID_CARTA_CENIZA))
+    )
+    contenido.add_child(selector_guantes)
+
+    boton_poner_guantes = Button.new()
+    boton_poner_guantes.visible = false
+    boton_poner_guantes.custom_minimum_size = Vector2(0, 42)
+    boton_poner_guantes.pressed.connect(func() -> void:
+        var id: String = DatosJugador.guantes_seleccionados
+        DatosJugador.poner_guantes(id)
+        mostrar_detalles(DatosJugador.obtener_objeto(id))
+    )
+    contenido.add_child(boton_poner_guantes)
+
+    boton_refinar_guantes = Button.new()
+    boton_refinar_guantes.visible = false
+    boton_refinar_guantes.custom_minimum_size = Vector2(0, 46)
+    boton_refinar_guantes.pressed.connect(intentar_refinar_guantes)
+    contenido.add_child(boton_refinar_guantes)
+
+    # Ranura visible en la ficha de los guantes.
+    panel_ranura_guantes = HBoxContainer.new()
+    panel_ranura_guantes.add_theme_constant_override("separation", 12)
+    panel_ranura_guantes.visible = false
+    contenido.add_child(panel_ranura_guantes)
+
+    var marco_ranura := PanelContainer.new()
+    var estilo_ranura := StyleBoxFlat.new()
+    estilo_ranura.bg_color = Color("#1A1824")
+    estilo_ranura.border_color = Color("#C6A55B")
+    estilo_ranura.set_border_width_all(2)
+    estilo_ranura.set_corner_radius_all(8)
+    estilo_ranura.set_content_margin_all(6)
+    marco_ranura.add_theme_stylebox_override("panel", estilo_ranura)
+    panel_ranura_guantes.add_child(marco_ranura)
+
+    icono_ranura_guantes = TextureRect.new()
+    icono_ranura_guantes.custom_minimum_size = Vector2(90, 90)
+    icono_ranura_guantes.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+    icono_ranura_guantes.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    marco_ranura.add_child(icono_ranura_guantes)
+
+    texto_ranura_guantes = Label.new()
+    texto_ranura_guantes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    texto_ranura_guantes.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    texto_ranura_guantes.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    texto_ranura_guantes.add_theme_font_size_override("font_size", 16)
+    panel_ranura_guantes.add_child(texto_ranura_guantes)
+
+
     # Tamaño inicial adaptado a la resolución del juego.
 
     var pantalla: Vector2 = get_viewport().get_visible_rect().size
@@ -1224,6 +1293,8 @@ func mostrar_detalles(objeto: Dictionary) -> void:
 
         tamano_imagen_base = Vector2(360, 360)
 
+    if DatosJugador.es_guante(str(objeto.get("id", ""))) or nombre_detalle.text.begins_with("Guantes"):
+        tamano_imagen_base = Vector2(180, 180)
     establecer_zoom(1.0)
 
     var texto: String = "Tipo: %s    |    Rareza: %s\nCantidad: x%d" % [
@@ -1237,6 +1308,24 @@ func mostrar_detalles(objeto: Dictionary) -> void:
     ]
 
     var descripcion: String = str(objeto.get("descripcion", ""))
+    var id_guantes_detalle: String = ""
+    for id_posible in DatosJugador.ranuras_por_guantes.keys():
+        if str(DatosJugador.catalogo_objetos[id_posible].get("nombre", "")) == nombre_detalle.text:
+            id_guantes_detalle = str(id_posible)
+            break
+    if id_guantes_detalle != "":
+        var atributos: Dictionary = DatosJugador.atributos_guantes.get(id_guantes_detalle, {})
+        var nivel_refinado: int = DatosJugador.obtener_nivel_refinado_guantes(id_guantes_detalle)
+        descripcion = "Defensa: +%d | Refinado: +%d/%d\nRanuras: %d" % [
+            DatosJugador.obtener_defensa_guantes(id_guantes_detalle),
+            nivel_refinado,
+            DatosJugador.MAX_REFINADO_GUANTES,
+            int(DatosJugador.ranuras_por_guantes.get(id_guantes_detalle, 0))
+        ]
+        if nivel_refinado < DatosJugador.MAX_REFINADO_GUANTES:
+            descripcion += "\nPróxima mejora: %d fragmentos de esencia" % DatosJugador.obtener_costo_refinado_guantes(id_guantes_detalle)
+        else:
+            descripcion += "\nREFINADO MÁXIMO"
 
     if descripcion != "":
 
@@ -1264,7 +1353,7 @@ func mostrar_detalles(objeto: Dictionary) -> void:
         var cantidad_ceniza: int = DatosJugador.obtener_cantidad_objeto("ceniza_ancestral")
         if DatosJugador.carta_esta_desbloqueada("carta_ceniza_cipitio"):
             texto += "\n\nESTADO: DESBLOQUEADA"
-            texto += "\nDisponible para equipar en guantes cuando se implemente."
+            texto += "\nSelecciona unos guantes y su ranura para equiparla."
             informacion_detalle.add_theme_color_override("font_color", Color("#81DF9A"))
             boton_desbloquear.visible = false
         else:
@@ -1282,6 +1371,72 @@ func mostrar_detalles(objeto: Dictionary) -> void:
     else:
         boton_desbloquear.visible = false
         informacion_detalle.add_theme_color_override("font_color", Color.WHITE)
+
+    boton_equipar_carta.visible = false
+    selector_guantes.visible = false
+    boton_poner_guantes.visible = false
+    boton_refinar_guantes.visible = false
+    panel_ranura_guantes.visible = false
+    var id_carta: String = DatosJugador.ID_CARTA_CENIZA
+    var id_guantes: String = ""
+    for candidato in DatosJugador.ranuras_por_guantes:
+        if nombre_detalle.text == str(DatosJugador.catalogo_objetos[candidato].get("nombre", "")):
+            id_guantes = str(candidato)
+            break
+
+    if nombre_detalle.text == "Carta: Ceniza del Cipitío" and DatosJugador.carta_esta_desbloqueada(id_carta):
+        selector_guantes.clear()
+        var indice_seleccionado: int = 0
+        for candidato in DatosJugador.ranuras_por_guantes:
+            if DatosJugador.tiene_objeto(str(candidato)):
+                var posicion: int = selector_guantes.item_count
+                selector_guantes.add_item(str(DatosJugador.catalogo_objetos[candidato]["nombre"]))
+                selector_guantes.set_item_metadata(posicion, str(candidato))
+                if str(candidato) == DatosJugador.guantes_seleccionados:
+                    indice_seleccionado = posicion
+        if selector_guantes.item_count > 0:
+            selector_guantes.select(indice_seleccionado)
+            selector_guantes.visible = true
+        var ubicacion: String = DatosJugador.guantes_de_carta(id_carta)
+        texto += "\n\nSelecciona los guantes donde colocar la carta."
+        texto += "\nEstado: " + ("EQUIPADA en " + str(DatosJugador.catalogo_objetos[ubicacion]["nombre"]) if ubicacion != "" else "SIN EQUIPAR")
+        boton_equipar_carta.visible = true
+        boton_equipar_carta.disabled = ubicacion == "" and not DatosJugador.puede_equipar_carta(id_carta)
+        boton_equipar_carta.text = "Quitar de los guantes" if ubicacion != "" else "Equipar en los guantes seleccionados"
+
+    if id_guantes != "":
+        DatosJugador.seleccionar_guantes(id_guantes)
+        var espacios: Array = DatosJugador.obtener_ranuras(id_guantes)
+        texto += "\n\nRanuras para cartas: %d" % espacios.size()
+        texto += "\n" + ("PUESTOS EN EL HÉROE" if DatosJugador.guantes_puestos == id_guantes else "GUARDADOS EN INVENTARIO")
+        boton_poner_guantes.visible = true
+        boton_poner_guantes.disabled = DatosJugador.guantes_puestos == id_guantes
+        boton_poner_guantes.text = "Guantes puestos" if boton_poner_guantes.disabled else "Ponerse estos guantes"
+        boton_refinar_guantes.visible = true
+        var nivel: int = DatosJugador.obtener_nivel_refinado_guantes(id_guantes)
+        if nivel >= DatosJugador.MAX_REFINADO_GUANTES:
+            boton_refinar_guantes.text = "Refinado máximo (+%d)" % nivel
+            boton_refinar_guantes.disabled = true
+        else:
+            var costo: int = DatosJugador.obtener_costo_refinado_guantes(id_guantes)
+            boton_refinar_guantes.text = "Refinar a +%d (%d fragmentos)" % [nivel + 1, costo]
+            boton_refinar_guantes.disabled = not DatosJugador.puede_refinar_guantes(id_guantes)
+        panel_ranura_guantes.visible = true
+        icono_ranura_guantes.texture = null
+        var carta_ranura: String = str(espacios[0]) if espacios.size() > 0 else ""
+        if carta_ranura != "":
+            var ruta_carta: String = str(DatosJugador.catalogo_objetos[carta_ranura].get("icono", ""))
+            if ResourceLoader.exists(ruta_carta):
+                icono_ranura_guantes.texture = load(ruta_carta)
+            texto_ranura_guantes.text = "RANURA 1: " + str(DatosJugador.catalogo_objetos[carta_ranura]["nombre"]) + "\nEstado: EQUIPADA"
+            boton_equipar_carta.visible = true
+            boton_equipar_carta.disabled = false
+            boton_equipar_carta.text = "Quitar carta de estos guantes"
+        else:
+            texto_ranura_guantes.text = "RANURA 1: VACÍA"
+            boton_equipar_carta.visible = DatosJugador.carta_esta_desbloqueada(id_carta) and DatosJugador.tiene_objeto(id_carta)
+            boton_equipar_carta.disabled = not DatosJugador.puede_equipar_carta(id_carta, id_guantes)
+            boton_equipar_carta.text = "Equipar Ceniza del Cipitío aquí"
 
     informacion_detalle.text = texto
 
@@ -1328,3 +1483,29 @@ func intentar_desbloquear_carta() -> void:
         if not objeto_detalle_actual.is_empty():
 
             mostrar_detalles(objeto_detalle_actual)
+
+
+func alternar_equipamiento_carta() -> void:
+    var id_carta: String = DatosJugador.ID_CARTA_CENIZA
+    var id_guantes: String = DatosJugador.guantes_seleccionados
+    if DatosJugador.carta_esta_equipada(id_carta):
+        DatosJugador.quitar_carta_guantes(id_carta)
+    else:
+        DatosJugador.equipar_carta_guantes(id_carta, id_guantes, 0)
+    var nombre_actual: String = str(objeto_detalle_actual.get("nombre", ""))
+    if nombre_actual == "Carta: Ceniza del Cipitío":
+        mostrar_detalles(DatosJugador.obtener_objeto(id_carta))
+    else:
+        mostrar_detalles(DatosJugador.obtener_objeto(id_guantes))
+
+# Refinar únicamente los guantes cuya ficha está abierta.
+func intentar_refinar_guantes() -> void:
+    var id_guantes: String = ""
+    for candidato in DatosJugador.ranuras_por_guantes:
+        if nombre_detalle.text == str(DatosJugador.catalogo_objetos[candidato].get("nombre", "")):
+            id_guantes = str(candidato)
+            break
+    if id_guantes == "":
+        return
+    if DatosJugador.refinar_guantes(id_guantes):
+        mostrar_detalles(DatosJugador.obtener_objeto(id_guantes))

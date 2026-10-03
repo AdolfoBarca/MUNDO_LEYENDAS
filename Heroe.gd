@@ -14,6 +14,19 @@ extends CharacterBody3D
 
 @export var defensa: int = 3
 
+# La defensa del nivel se mantiene en 'defensa'. El equipo se calcula aparte.
+func obtener_defensa_total() -> int:
+    return defensa + DatosJugador.obtener_defensa_guantes_puestos()
+
+func al_cambiar_equipamiento() -> void:
+    print("DEFENSA ACTUALIZADA: base=", defensa,
+        " guantes=", DatosJugador.obtener_defensa_guantes_puestos(),
+        " total=", obtener_defensa_total())
+    actualizar_interfaz()
+
+
+
+
 # =========================================================
 
 # VIDA DEL HÉROE
@@ -89,20 +102,28 @@ var gravity: float = ProjectSettings.get_setting(
 var attack_timer: float = 0.0
 
 # EFECTO DE CENIZA MÁGICA
+
 var tiempo_ceniza: float = 0.0
+
 var multiplicador_velocidad_ceniza: float = 1.0
 
 func aplicar_ceniza_magica(duracion: float = 4.0, reduccion: float = 0.30) -> void:
+
     if esta_muerto or en_zona_segura:
+
         return
+
     tiempo_ceniza = max(tiempo_ceniza, duracion)
+
     multiplicador_velocidad_ceniza = clampf(1.0 - reduccion, 0.1, 1.0)
+
     print("CENIZA MÁGICA: velocidad reducida durante ", duracion, " segundos")
 
 func limpiar_ceniza_magica() -> void:
-    tiempo_ceniza = 0.0
-    multiplicador_velocidad_ceniza = 1.0
 
+    tiempo_ceniza = 0.0
+
+    multiplicador_velocidad_ceniza = 1.0
 
 # =========================================================
 
@@ -147,6 +168,10 @@ func limpiar_ceniza_magica() -> void:
 # =========================================================
 
 func _ready() -> void:
+
+    # Escuchar cambios de equipo y refinado durante toda la partida.
+    if not DatosJugador.equipamiento_actualizado.is_connected(al_cambiar_equipamiento):
+        DatosJugador.equipamiento_actualizado.connect(al_cambiar_equipamiento)
 
     vida_actual = vida_maxima
 
@@ -202,7 +227,9 @@ func _ready() -> void:
 
     print("Daño: ", dano)
 
-    print("Defensa: ", defensa)
+    print("Defensa base: ", defensa)
+    print("Defensa de guantes: ", DatosJugador.obtener_defensa_guantes_puestos())
+    print("Defensa total: ", obtener_defensa_total())
 
     print("Respawn inicial: ", posicion_respawn_actual)
 
@@ -294,7 +321,7 @@ func recibir_dano(cantidad: int) -> void:
 
         return
 
-    var dano_final: int = max(cantidad - defensa, 1)
+    var dano_final: int = max(cantidad - obtener_defensa_total(), 1)
 
     vida_actual -= dano_final
 
@@ -490,7 +517,7 @@ func subir_nivel() -> void:
 
     print("DAÑO: ", dano)
 
-    print("DEFENSA: ", defensa)
+    print("DEFENSA TOTAL: ", obtener_defensa_total())
 
     print("SIGUIENTE NIVEL: ", experiencia_actual, "/", experiencia_para_siguiente_nivel, " XP")
 
@@ -689,9 +716,13 @@ func _physics_process(delta: float) -> void:
     regenerar_vida(delta)
 
     if tiempo_ceniza > 0.0:
+
         tiempo_ceniza = maxf(0.0, tiempo_ceniza - delta)
+
         if tiempo_ceniza <= 0.0:
+
             limpiar_ceniza_magica()
+
             print("CENIZA MÁGICA: velocidad recuperada")
 
     var move_dir := Vector3.ZERO
