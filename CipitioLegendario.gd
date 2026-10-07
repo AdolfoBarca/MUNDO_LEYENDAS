@@ -2,7 +2,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 # MUNDO_LEYENDAS - CIPITÍO LEGENDARIO
+
+
+
+
 
 
 
@@ -10,7 +18,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export_group("Estadísticas")
+
+
+
+
 
 
 
@@ -18,7 +34,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var ataque_base: int = 35
+
+
+
+
 
 
 
@@ -26,7 +50,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export_group("Combate")
+
+
+
+
 
 
 
@@ -34,7 +66,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var velocidad_fase_2: float = 4.0
+
+
+
+
 
 
 
@@ -42,7 +82,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var distancia_ataque: float = 2.5
+
+
+
+
 
 
 
@@ -50,7 +98,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var tiempo_entre_ataques: float = 1.8
+
+
+
+
 
 
 
@@ -58,7 +114,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var alcance_ceniza: float = 8.0
+
+
+
+
 
 
 
@@ -66,7 +130,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var duracion_ceniza_fase_2: float = 6.0
+
+
+
+
 
 
 
@@ -74,7 +146,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var reduccion_fase_2: float = 0.55
+
+
+
+
 
 
 
@@ -82,22 +162,45 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var recarga_ceniza_fase_2: float = 7.0
 
 
 
+
+
+
+
 @export_group("Reaparición")
+
 @export var tiempo_reaparicion: float = 60.0
+
+
 
 @export_group("Recompensas legendarias")
 
 
 
+
+
+
+
 @export var experiencia_victoria: int = 500
+
+
 
 @export_range(0.0, 1.0, 0.01) var probabilidad_tecomate: float = 0.05
 
+
+
 @export_range(0.0, 1.0, 0.01) var probabilidad_carta: float = 0.01
+
+
+
+
 
 
 
@@ -105,7 +208,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var radio_tormenta: float = 5.0
+
+
+
+
 
 
 
@@ -113,7 +224,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var duracion_tormenta: float = 3.0
+
+
+
+
 
 
 
@@ -121,7 +240,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @export var recarga_tormenta: float = 12.0
+
+
+
+
 
 
 
@@ -129,7 +256,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 # Mantener los mismos nombres de nodos que en BosqueCipitio.tscn.
+
+
+
+
 
 
 
@@ -137,7 +272,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @onready var vida_label: Label3D = $VidaLabel
+
+
+
+
 
 
 
@@ -145,7 +288,15 @@ extends CharacterBody3D
 
 
 
+
+
+
+
 @onready var barra_fondo: MeshInstance3D = $BarraVidaFondo
+
+
+
+
 
 
 
@@ -153,7 +304,15 @@ const ANCHO_BARRA: float = 2.3
 
 
 
+
+
+
+
 const ALTURA_BARRA: float = 4.55
+
+
+
+
 
 
 
@@ -161,7 +320,15 @@ const SEPARACION_BARRAS: float = 0.15
 
 
 
+
+
+
+
 const ATAQUE_FASE_2: int = 50
+
+
+
+
 
 
 
@@ -169,7 +336,15 @@ enum Estado { QUIETO, PERSIGUIENDO, REGRESANDO }
 
 
 
+
+
+
+
 var estado_actual: Estado = Estado.QUIETO
+
+
+
+
 
 
 
@@ -177,13 +352,27 @@ var vida_actual: int = 1500
 
 
 
+
+
+
+
 var fase_actual: int = 1
 
 
 
+
+
+
+
 var derrotado: bool = false
+
 var capa_colision_inicial: int = 0
+
 var mascara_colision_inicial: int = 0
+
+
+
+
 
 
 
@@ -191,7 +380,15 @@ var heroe: CharacterBody3D = null
 
 
 
+
+
+
+
 var posicion_inicial: Vector3
+
+
+
+
 
 
 
@@ -199,7 +396,15 @@ var temporizador_ataque: float = 0.0
 
 
 
+
+
+
+
 var temporizador_ceniza: float = 3.0
+
+
+
+
 
 
 
@@ -207,7 +412,21 @@ var temporizador_tormenta: float = 0.0
 
 
 
+
+
+
+
 var velocidad_actual: float = 2.8
+
+# RALENTIZACIÓN RECIBIDA DE LA CARTA CENIZA DEL CIPITÍO
+var tiempo_ceniza_jugador: float = 0.0
+var multiplicador_velocidad_ceniza_jugador: float = 1.0
+var aura_ceniza_jugador: MeshInstance3D = null
+
+
+
+
+
 
 
 
@@ -215,7 +434,15 @@ var ataque_inicial: int = 35
 
 
 
+
+
+
+
 var color_barra_inicial: Color = Color.RED
+
+
+
+
 
 
 
@@ -223,13 +450,27 @@ func _ready() -> void:
 
 
 
+
+
+
+
     posicion_inicial = global_position
+
     capa_colision_inicial = collision_layer
+
     mascara_colision_inicial = collision_mask
 
 
 
+
+
+
+
     vida_actual = vida_maxima
+
+
+
+
 
 
 
@@ -237,7 +478,15 @@ func _ready() -> void:
 
 
 
+
+
+
+
     velocidad_actual = velocidad_fase_1
+
+
+
+
 
 
 
@@ -245,7 +494,15 @@ func _ready() -> void:
 
 
 
+
+
+
+
         barra_relleno.mesh = barra_relleno.mesh.duplicate()
+
+
+
+
 
 
 
@@ -253,7 +510,15 @@ func _ready() -> void:
 
 
 
+
+
+
+
         barra_relleno.material_override = barra_relleno.material_override.duplicate()
+
+
+
+
 
 
 
@@ -261,7 +526,15 @@ func _ready() -> void:
 
 
 
+
+
+
+
     if material != null:
+
+
+
+
 
 
 
@@ -269,7 +542,15 @@ func _ready() -> void:
 
 
 
+
+
+
+
     # Desactivar Billboard individual: las dos barras comparten orientación.
+
+
+
+
 
 
 
@@ -277,7 +558,15 @@ func _ready() -> void:
 
 
 
+
+
+
+
         var material_barra := barra.material_override as StandardMaterial3D
+
+
+
+
 
 
 
@@ -285,7 +574,15 @@ func _ready() -> void:
 
 
 
+
+
+
+
             material_barra.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
+
+
+
+
 
 
 
@@ -293,7 +590,15 @@ func _ready() -> void:
 
 
 
+
+
+
+
     actualizar_interfaz()
+
+
+
+
 
 
 
@@ -301,7 +606,15 @@ func _ready() -> void:
 
 
 
+
+
+
+
     print("==============================")
+
+
+
+
 
 
 
@@ -309,11 +622,23 @@ func _ready() -> void:
 
 
 
+
+
+
+
     print("VIDA: ", vida_actual)
 
 
 
+
+
+
+
     print("ATAQUE: ", ataque_base)
+
+
+
+
 
 
 
@@ -321,11 +646,23 @@ func _ready() -> void:
 
 
 
+
+
+
+
     print("POSICIÓN: ", posicion_inicial)
 
 
 
+
+
+
+
     print("==============================")
+
+
+
+
 
 
 
@@ -333,7 +670,15 @@ func _ready() -> void:
 
 
 
+
+
+
+
 func _process(_delta: float) -> void:
+
+
+
+
 
 
 
@@ -341,7 +686,15 @@ func _process(_delta: float) -> void:
 
 
 
+
+
+
+
 func orientar_barras() -> void:
+
+
+
+
 
 
 
@@ -349,11 +702,23 @@ func orientar_barras() -> void:
 
 
 
+
+
+
+
     if camara == null:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -361,7 +726,15 @@ func orientar_barras() -> void:
 
 
 
+
+
+
+
     var base_camara := camara.global_transform.basis.orthonormalized()
+
+
+
+
 
 
 
@@ -369,7 +742,15 @@ func orientar_barras() -> void:
 
 
 
+
+
+
+
     barra_fondo.global_transform = Transform3D(base_camara, centro)
+
+
+
+
 
 
 
@@ -377,7 +758,15 @@ func orientar_barras() -> void:
 
 
 
+
+
+
+
     var porcentaje := clampf(float(vida_actual) / float(maxi(1, vida_maxima)), 0.0, 1.0)
+
+
+
+
 
 
 
@@ -385,7 +774,15 @@ func orientar_barras() -> void:
 
 
 
+
+
+
+
     barra_relleno.global_transform = Transform3D(
+
+
+
+
 
 
 
@@ -393,7 +790,15 @@ func orientar_barras() -> void:
 
 
 
+
+
+
+
         centro + base_camara.z * SEPARACION_BARRAS + base_camara.x * izquierda
+
+
+
+
 
 
 
@@ -401,7 +806,17 @@ func orientar_barras() -> void:
 
 
 
+
+
+
+
 func _physics_process(delta: float) -> void:
+
+    actualizar_ceniza_jugador(delta)
+
+
+
+
 
 
 
@@ -409,7 +824,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -417,7 +840,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
     temporizador_ceniza = maxf(0.0, temporizador_ceniza - delta)
+
+
+
+
 
 
 
@@ -425,7 +856,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
     if not is_instance_valid(heroe):
+
+
+
+
 
 
 
@@ -433,7 +872,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
     if not is_instance_valid(heroe):
+
+
+
+
 
 
 
@@ -441,7 +888,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -449,7 +904,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
     var distancia_heroe_centro := distancia_horizontal(posicion_inicial, heroe.global_position)
+
+
+
+
 
 
 
@@ -457,7 +920,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
     var heroe_no_disponible := heroe_no_es_objetivo()
+
+
+
+
 
 
 
@@ -465,7 +936,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
         Estado.QUIETO:
+
+
+
+
 
 
 
@@ -473,11 +952,23 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
             if heroe_no_disponible or distancia_heroe_centro > radio_arena:
 
 
 
+
+
+
+
                 return
+
+
+
+
 
 
 
@@ -485,7 +976,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
                 estado_actual = Estado.PERSIGUIENDO
+
+
+
+
 
 
 
@@ -493,7 +992,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
         Estado.PERSIGUIENDO:
+
+
+
+
 
 
 
@@ -501,11 +1008,23 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
                 comenzar_regreso()
 
 
 
+
+
+
+
                 return
+
+
+
+
 
 
 
@@ -513,7 +1032,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
                 mover_hacia_heroe()
+
+
+
+
 
 
 
@@ -521,7 +1048,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
                 velocity.x = 0.0
+
+
+
+
 
 
 
@@ -529,7 +1064,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
                 atacar_heroe()
+
+
+
+
 
 
 
@@ -537,7 +1080,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
             intentar_tormenta(distancia_heroe)
+
+
+
+
 
 
 
@@ -545,7 +1096,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
             var distancia_regreso := distancia_horizontal(global_position, posicion_inicial)
+
+
+
+
 
 
 
@@ -553,7 +1112,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
                 global_position = posicion_inicial
+
+
+
+
 
 
 
@@ -561,7 +1128,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
                 restaurar_jefe()
+
+
+
+
 
 
 
@@ -569,7 +1144,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
             mover_hacia_posicion(posicion_inicial)
+
+
+
+
 
 
 
@@ -577,7 +1160,15 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+
+
+
     move_and_slide()
+
+
+
+
 
 
 
@@ -585,11 +1176,23 @@ func heroe_no_es_objetivo() -> bool:
 
 
 
+
+
+
+
     if not is_instance_valid(heroe):
 
 
 
+
+
+
+
         return true
+
+
+
+
 
 
 
@@ -597,7 +1200,15 @@ func heroe_no_es_objetivo() -> bool:
 
 
 
+
+
+
+
         return true
+
+
+
+
 
 
 
@@ -605,7 +1216,15 @@ func heroe_no_es_objetivo() -> bool:
 
 
 
+
+
+
+
         return true
+
+
+
+
 
 
 
@@ -613,7 +1232,15 @@ func heroe_no_es_objetivo() -> bool:
 
 
 
+
+
+
+
 func distancia_horizontal(origen: Vector3, destino: Vector3) -> float:
+
+
+
+
 
 
 
@@ -621,7 +1248,15 @@ func distancia_horizontal(origen: Vector3, destino: Vector3) -> float:
 
 
 
+
+
+
+
     diferencia.y = 0.0
+
+
+
+
 
 
 
@@ -629,7 +1264,15 @@ func distancia_horizontal(origen: Vector3, destino: Vector3) -> float:
 
 
 
+
+
+
+
 func aplicar_gravedad(delta: float) -> void:
+
+
+
+
 
 
 
@@ -637,11 +1280,23 @@ func aplicar_gravedad(delta: float) -> void:
 
 
 
+
+
+
+
         velocity.y -= 9.8 * delta
 
 
 
+
+
+
+
     else:
+
+
+
+
 
 
 
@@ -649,7 +1304,15 @@ func aplicar_gravedad(delta: float) -> void:
 
 
 
+
+
+
+
 func buscar_heroe() -> void:
+
+
+
+
 
 
 
@@ -657,11 +1320,23 @@ func buscar_heroe() -> void:
 
 
 
+
+
+
+
     if heroes.is_empty():
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -669,7 +1344,15 @@ func buscar_heroe() -> void:
 
 
 
+
+
+
+
 func mover_hacia_heroe() -> void:
+
+
+
+
 
 
 
@@ -677,7 +1360,15 @@ func mover_hacia_heroe() -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -685,7 +1376,15 @@ func mover_hacia_heroe() -> void:
 
 
 
+
+
+
+
     direccion.y = 0.0
+
+
+
+
 
 
 
@@ -693,7 +1392,15 @@ func mover_hacia_heroe() -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -701,11 +1408,23 @@ func mover_hacia_heroe() -> void:
 
 
 
-    velocity.x = direccion.x * velocidad_actual
 
 
 
-    velocity.z = direccion.z * velocidad_actual
+
+    velocity.x = direccion.x * velocidad_actual * multiplicador_velocidad_ceniza_jugador
+
+
+
+
+
+
+
+    velocity.z = direccion.z * velocidad_actual * multiplicador_velocidad_ceniza_jugador
+
+
+
+
 
 
 
@@ -713,7 +1432,15 @@ func mover_hacia_heroe() -> void:
 
 
 
+
+
+
+
 func mirar_hacia(objetivo: Vector3) -> void:
+
+
+
+
 
 
 
@@ -721,11 +1448,23 @@ func mirar_hacia(objetivo: Vector3) -> void:
 
 
 
+
+
+
+
     if global_position.distance_to(posicion_objetivo) <= 0.01:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -733,7 +1472,15 @@ func mirar_hacia(objetivo: Vector3) -> void:
 
 
 
+
+
+
+
 func atacar_heroe() -> void:
+
+
+
+
 
 
 
@@ -741,7 +1488,15 @@ func atacar_heroe() -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -749,7 +1504,15 @@ func atacar_heroe() -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -757,7 +1520,15 @@ func atacar_heroe() -> void:
 
 
 
+
+
+
+
     temporizador_ataque = tiempo_entre_ataques
+
+
+
+
 
 
 
@@ -765,7 +1536,15 @@ func atacar_heroe() -> void:
 
 
 
+
+
+
+
 func intentar_ceniza(distancia: float) -> void:
+
+
+
+
 
 
 
@@ -773,7 +1552,15 @@ func intentar_ceniza(distancia: float) -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -781,7 +1568,15 @@ func intentar_ceniza(distancia: float) -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -789,7 +1584,15 @@ func intentar_ceniza(distancia: float) -> void:
 
 
 
+
+
+
+
     var reduccion := reduccion_fase_1
+
+
+
+
 
 
 
@@ -797,7 +1600,15 @@ func intentar_ceniza(distancia: float) -> void:
 
 
 
+
+
+
+
     if fase_actual == 2:
+
+
+
+
 
 
 
@@ -805,7 +1616,15 @@ func intentar_ceniza(distancia: float) -> void:
 
 
 
+
+
+
+
         reduccion = reduccion_fase_2
+
+
+
+
 
 
 
@@ -813,7 +1632,15 @@ func intentar_ceniza(distancia: float) -> void:
 
 
 
+
+
+
+
     heroe.aplicar_ceniza_magica(duracion, reduccion)
+
+
+
+
 
 
 
@@ -821,7 +1648,15 @@ func intentar_ceniza(distancia: float) -> void:
 
 
 
+
+
+
+
     crear_efecto_ceniza(heroe.global_position)
+
+
+
+
 
 
 
@@ -829,7 +1664,15 @@ func intentar_ceniza(distancia: float) -> void:
 
 
 
+
+
+
+
 # Habilidad nueva: solo durante la segunda fase.
+
+
+
+
 
 
 
@@ -837,7 +1680,15 @@ func intentar_ceniza(distancia: float) -> void:
 
 
 
+
+
+
+
 # No crea un área de daño persistente: el efecto visual dura 0.9 segundos.
+
+
+
+
 
 
 
@@ -845,11 +1696,23 @@ func intentar_tormenta(distancia: float) -> void:
 
 
 
+
+
+
+
     if fase_actual != 2 or temporizador_tormenta > 0.0:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -857,7 +1720,15 @@ func intentar_tormenta(distancia: float) -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -865,7 +1736,15 @@ func intentar_tormenta(distancia: float) -> void:
 
 
 
+
+
+
+
     crear_efecto_tormenta()
+
+
+
+
 
 
 
@@ -873,7 +1752,15 @@ func intentar_tormenta(distancia: float) -> void:
 
 
 
+
+
+
+
         heroe.recibir_dano(dano_tormenta)
+
+
+
+
 
 
 
@@ -881,7 +1768,15 @@ func intentar_tormenta(distancia: float) -> void:
 
 
 
+
+
+
+
     if not heroe_no_es_objetivo() and heroe.has_method("aplicar_ceniza_magica"):
+
+
+
+
 
 
 
@@ -889,7 +1784,15 @@ func intentar_tormenta(distancia: float) -> void:
 
 
 
+
+
+
+
     print("¡TORMENTA DE CENIZA LEGENDARIA! DAÑO: ", dano_tormenta, " | RADIO: ", radio_tormenta)
+
+
+
+
 
 
 
@@ -897,7 +1800,15 @@ func crear_efecto_ceniza(posicion: Vector3) -> void:
 
 
 
+
+
+
+
     var color := Color(0.5, 0.2, 0.7, 0.65)
+
+
+
+
 
 
 
@@ -905,7 +1816,15 @@ func crear_efecto_ceniza(posicion: Vector3) -> void:
 
 
 
+
+
+
+
         color = Color(0.9, 0.15, 0.1, 0.75)
+
+
+
+
 
 
 
@@ -913,7 +1832,15 @@ func crear_efecto_ceniza(posicion: Vector3) -> void:
 
 
 
+
+
+
+
 func crear_efecto_tormenta() -> void:
+
+
+
+
 
 
 
@@ -921,7 +1848,15 @@ func crear_efecto_tormenta() -> void:
 
 
 
+
+
+
+
     crear_nube(global_position + Vector3(0, 1, 0), 0.8, Vector3(radio_tormenta, 1.8, radio_tormenta), Color(0.95, 0.25, 0.08, 0.45))
+
+
+
+
 
 
 
@@ -929,7 +1864,15 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
     var escena := get_tree().current_scene
+
+
+
+
 
 
 
@@ -937,7 +1880,15 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -945,7 +1896,15 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
     var esfera := SphereMesh.new()
+
+
+
+
 
 
 
@@ -953,7 +1912,15 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
     esfera.height = radio * 2.0
+
+
+
+
 
 
 
@@ -961,7 +1928,15 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
     var material := StandardMaterial3D.new()
+
+
+
+
 
 
 
@@ -969,7 +1944,15 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
     material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+
+
+
+
 
 
 
@@ -977,7 +1960,15 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
     material.no_depth_test = false
+
+
+
+
 
 
 
@@ -985,7 +1976,15 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
     escena.add_child(nube)
+
+
+
+
 
 
 
@@ -993,7 +1992,15 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
     var tween := create_tween()
+
+
+
+
 
 
 
@@ -1001,7 +2008,15 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
     tween.parallel().tween_property(material, "albedo_color:a", 0.0, 0.9)
+
+
+
+
 
 
 
@@ -1009,7 +2024,96 @@ func crear_nube(posicion: Vector3, radio: float, escala_final: Vector3, color: C
 
 
 
+
+
+
+
+# =========================================================
+# CENIZA RECIBIDA DE LA CARTA DEL HÉROE
+# =========================================================
+
+func aplicar_ceniza_jugador(duracion: float = 6.0, reduccion: float = 0.55) -> void:
+    if derrotado:
+        return
+
+    tiempo_ceniza_jugador = maxf(tiempo_ceniza_jugador, duracion)
+    multiplicador_velocidad_ceniza_jugador = minf(
+        multiplicador_velocidad_ceniza_jugador,
+        clampf(1.0 - reduccion, 0.1, 1.0)
+    )
+
+    crear_aura_ceniza_jugador()
+
+    print(
+        "CIPITÍO LEGENDARIO AFECTADO POR CENIZA DEL CIPITÍO | Ralentización: ",
+        roundi(reduccion * 100.0),
+        "% | Duración: ",
+        duracion,
+        " s | Fase: ",
+        fase_actual
+    )
+
+
+func actualizar_ceniza_jugador(delta: float) -> void:
+    if tiempo_ceniza_jugador <= 0.0:
+        return
+
+    tiempo_ceniza_jugador = maxf(0.0, tiempo_ceniza_jugador - delta)
+
+    if tiempo_ceniza_jugador <= 0.0:
+        multiplicador_velocidad_ceniza_jugador = 1.0
+        eliminar_aura_ceniza_jugador()
+        print("CIPITÍO LEGENDARIO RECUPERÓ SU VELOCIDAD")
+
+
+func crear_aura_ceniza_jugador() -> void:
+    eliminar_aura_ceniza_jugador()
+
+    aura_ceniza_jugador = MeshInstance3D.new()
+    aura_ceniza_jugador.name = "AuraCartaCeniza"
+
+    var esfera := SphereMesh.new()
+    esfera.radius = 1.0
+    esfera.height = 2.0
+    esfera.radial_segments = 32
+    esfera.rings = 16
+    aura_ceniza_jugador.mesh = esfera
+
+    var material := StandardMaterial3D.new()
+    material.albedo_color = Color(0.42, 0.20, 0.55, 0.32)
+    material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+    material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+    material.cull_mode = BaseMaterial3D.CULL_DISABLED
+    aura_ceniza_jugador.material_override = material
+
+    add_child(aura_ceniza_jugador)
+    aura_ceniza_jugador.position = Vector3(0.0, 1.25, 0.0)
+    aura_ceniza_jugador.scale = Vector3(1.15, 1.5, 1.15)
+
+    # Pulso suave durante el estado ralentizado.
+    var tween := create_tween()
+    tween.set_loops()
+    tween.tween_property(aura_ceniza_jugador, "scale", Vector3(1.35, 1.7, 1.35), 0.65)
+    tween.tween_property(aura_ceniza_jugador, "scale", Vector3(1.15, 1.5, 1.15), 0.65)
+
+
+func eliminar_aura_ceniza_jugador() -> void:
+    if is_instance_valid(aura_ceniza_jugador):
+        aura_ceniza_jugador.queue_free()
+    aura_ceniza_jugador = null
+
+
+func limpiar_ceniza_jugador() -> void:
+    tiempo_ceniza_jugador = 0.0
+    multiplicador_velocidad_ceniza_jugador = 1.0
+    eliminar_aura_ceniza_jugador()
+
+
 func recibir_dano(cantidad: int) -> void:
+
+
+
+
 
 
 
@@ -1017,7 +2121,15 @@ func recibir_dano(cantidad: int) -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -1025,7 +2137,15 @@ func recibir_dano(cantidad: int) -> void:
 
 
 
+
+
+
+
     vida_actual = maxi(0, vida_actual - dano_real)
+
+
+
+
 
 
 
@@ -1033,7 +2153,15 @@ func recibir_dano(cantidad: int) -> void:
 
 
 
+
+
+
+
     actualizar_interfaz()
+
+
+
+
 
 
 
@@ -1041,11 +2169,23 @@ func recibir_dano(cantidad: int) -> void:
 
 
 
+
+
+
+
         morir()
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -1053,7 +2193,15 @@ func recibir_dano(cantidad: int) -> void:
 
 
 
+
+
+
+
         activar_segunda_fase()
+
+
+
+
 
 
 
@@ -1061,7 +2209,15 @@ func actualizar_interfaz() -> void:
 
 
 
+
+
+
+
     vida_label.text = "CIPITÍO LEGENDARIO\n" + str(vida_actual) + " / " + str(vida_maxima)
+
+
+
+
 
 
 
@@ -1069,7 +2225,15 @@ func actualizar_interfaz() -> void:
 
 
 
+
+
+
+
     var caja := barra_relleno.mesh as BoxMesh
+
+
+
+
 
 
 
@@ -1077,7 +2241,15 @@ func actualizar_interfaz() -> void:
 
 
 
+
+
+
+
         caja.size.x = ANCHO_BARRA * porcentaje
+
+
+
+
 
 
 
@@ -1085,7 +2257,15 @@ func activar_segunda_fase() -> void:
 
 
 
+
+
+
+
     fase_actual = 2
+
+
+
+
 
 
 
@@ -1093,7 +2273,15 @@ func activar_segunda_fase() -> void:
 
 
 
+
+
+
+
     velocidad_actual = velocidad_fase_2
+
+
+
+
 
 
 
@@ -1101,11 +2289,23 @@ func activar_segunda_fase() -> void:
 
 
 
+
+
+
+
     var material := barra_relleno.material_override as StandardMaterial3D
 
 
 
+
+
+
+
     if material != null:
+
+
+
+
 
 
 
@@ -1113,7 +2313,15 @@ func activar_segunda_fase() -> void:
 
 
 
+
+
+
+
     print("==============================")
+
+
+
+
 
 
 
@@ -1121,7 +2329,15 @@ func activar_segunda_fase() -> void:
 
 
 
+
+
+
+
     print("ATAQUE: ", ataque_base)
+
+
+
+
 
 
 
@@ -1129,11 +2345,23 @@ func activar_segunda_fase() -> void:
 
 
 
+
+
+
+
     print("TORMENTA DISPONIBLE EN: ", espera_primera_tormenta, " SEGUNDOS")
 
 
 
+
+
+
+
     print("==============================")
+
+
+
+
 
 
 
@@ -1141,11 +2369,23 @@ func comenzar_regreso() -> void:
 
 
 
+
+
+
+
     if estado_actual == Estado.REGRESANDO:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -1153,7 +2393,15 @@ func comenzar_regreso() -> void:
 
 
 
+
+
+
+
     velocity = Vector3.ZERO
+
+
+
+
 
 
 
@@ -1161,7 +2409,15 @@ func comenzar_regreso() -> void:
 
 
 
+
+
+
+
 func mover_hacia_posicion(destino: Vector3) -> void:
+
+
+
+
 
 
 
@@ -1169,7 +2425,15 @@ func mover_hacia_posicion(destino: Vector3) -> void:
 
 
 
+
+
+
+
     direccion.y = 0.0
+
+
+
+
 
 
 
@@ -1177,7 +2441,15 @@ func mover_hacia_posicion(destino: Vector3) -> void:
 
 
 
+
+
+
+
         velocity.x = 0.0
+
+
+
+
 
 
 
@@ -1185,7 +2457,15 @@ func mover_hacia_posicion(destino: Vector3) -> void:
 
 
 
+
+
+
+
         return
+
+
+
+
 
 
 
@@ -1193,15 +2473,33 @@ func mover_hacia_posicion(destino: Vector3) -> void:
 
 
 
-    velocity.x = direccion.x * velocidad_fase_1
 
 
 
-    velocity.z = direccion.z * velocidad_fase_1
+
+    velocity.x = direccion.x * velocidad_fase_1 * multiplicador_velocidad_ceniza_jugador
+
+
+
+
+
+
+
+    velocity.z = direccion.z * velocidad_fase_1 * multiplicador_velocidad_ceniza_jugador
+
+
+
+
 
 
 
 func restaurar_jefe() -> void:
+    limpiar_ceniza_jugador()
+
+
+
+
+
 
 
 
@@ -1209,7 +2507,15 @@ func restaurar_jefe() -> void:
 
 
 
+
+
+
+
     fase_actual = 1
+
+
+
+
 
 
 
@@ -1217,7 +2523,15 @@ func restaurar_jefe() -> void:
 
 
 
+
+
+
+
     ataque_base = ataque_inicial
+
+
+
+
 
 
 
@@ -1225,7 +2539,15 @@ func restaurar_jefe() -> void:
 
 
 
+
+
+
+
     temporizador_ataque = 0.0
+
+
+
+
 
 
 
@@ -1233,7 +2555,15 @@ func restaurar_jefe() -> void:
 
 
 
+
+
+
+
     temporizador_tormenta = 0.0
+
+
+
+
 
 
 
@@ -1241,7 +2571,15 @@ func restaurar_jefe() -> void:
 
 
 
+
+
+
+
     if material != null:
+
+
+
+
 
 
 
@@ -1249,7 +2587,15 @@ func restaurar_jefe() -> void:
 
 
 
+
+
+
+
     actualizar_interfaz()
+
+
+
+
 
 
 
@@ -1257,7 +2603,15 @@ func restaurar_jefe() -> void:
 
 
 
+
+
+
+
 func morir() -> void:
+
+
+
+
 
 
 
@@ -1265,11 +2619,24 @@ func morir() -> void:
 
 
 
+
+
+
+
         return
 
 
 
+
+
+
+
     derrotado = true
+    limpiar_ceniza_jugador()
+
+
+
+
 
 
 
@@ -1277,7 +2644,15 @@ func morir() -> void:
 
 
 
+
+
+
+
     print("==============================")
+
+
+
+
 
 
 
@@ -1285,7 +2660,15 @@ func morir() -> void:
 
 
 
+
+
+
+
     print("==============================")
+
+
+
+
 
 
 
@@ -1293,7 +2676,15 @@ func morir() -> void:
 
 
 
+
+
+
+
     if sistema_drops != null and sistema_drops.has_method("crear_objeto"):
+
+
+
+
 
 
 
@@ -1301,7 +2692,15 @@ func morir() -> void:
 
 
 
+
+
+
+
         sistema_drops.crear_objeto("corazon_cipitio", 1, posicion_drop)
+
+
+
+
 
 
 
@@ -1309,23 +2708,47 @@ func morir() -> void:
 
 
 
+
+
+
+
         sistema_drops.crear_objeto("fragmento_esencia", 5, posicion_drop)
+
+
+
+
 
 
 
         if randf() < probabilidad_tecomate:
 
+
+
             sistema_drops.crear_objeto("tecomate_espiritus", 1, posicion_drop)
+
+
 
             print("¡TECOMATE DE LOS ESPÍRITUS GENERADO!")
 
 
 
+
+
+
+
         if randf() < probabilidad_carta:
+
+
 
             sistema_drops.crear_objeto("carta_ceniza_cipitio", 1, posicion_drop)
 
+
+
             print("¡CARTA CENIZA DEL CIPITÍO GENERADA!")
+
+
+
+
 
 
 
@@ -1333,7 +2756,15 @@ func morir() -> void:
 
 
 
+
+
+
+
         push_warning("Cipitío: falta el nodo hijo SistemaDrops con su script.")
+
+
+
+
 
 
 
@@ -1341,20 +2772,40 @@ func morir() -> void:
 
 
 
+
+
+
+
         heroe.ganar_experiencia(experiencia_victoria)
 
 
 
+
+
+
+
     visible = false
+
     collision_layer = 0
+
     collision_mask = 0
+
     await get_tree().create_timer(tiempo_reaparicion).timeout
+
     if not is_inside_tree():
+
         return
+
     global_position = posicion_inicial
+
     derrotado = false
+
     restaurar_jefe()
+
     collision_layer = capa_colision_inicial
+
     collision_mask = mascara_colision_inicial
+
     visible = true
+
     print("CIPITÍO LEGENDARIO REAPARECIÓ")
