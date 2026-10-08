@@ -4,9 +4,10 @@ extends CharacterBody3D
 # CADEJO BLANCO - COMPAÑERO PROTECTOR
 # =========================================================
 
-# ---------------------------------------------------------
+
+# =========================================================
 # SEGUIMIENTO DEL HÉROE
-# ---------------------------------------------------------
+# =========================================================
 
 @export var velocidad: float = 4.8
 @export var distancia_seguimiento: float = 2.4
@@ -14,9 +15,9 @@ extends CharacterBody3D
 @export var suavidad_giro: float = 8.0
 
 
-# ---------------------------------------------------------
+# =========================================================
 # COMBATE
-# ---------------------------------------------------------
+# =========================================================
 
 @export var dano_ataque: int = 15
 @export var distancia_deteccion_enemigo: float = 7.0
@@ -27,9 +28,9 @@ extends CharacterBody3D
 @export var distancia_maxima_combate_heroe: float = 10.0
 
 
-# ---------------------------------------------------------
+# =========================================================
 # REFERENCIAS
-# ---------------------------------------------------------
+# =========================================================
 
 var heroe: Node3D = null
 var enemigo_objetivo: Node3D = null
@@ -46,6 +47,7 @@ var tiempo_ataque: float = 0.0
 # =========================================================
 
 func _ready() -> void:
+
 	print("==============================")
 	print("CADEJO BLANCO LISTO")
 	print("Estado: compañero protector")
@@ -54,6 +56,7 @@ func _ready() -> void:
 
 
 func asignar_heroe(nuevo_heroe: Node3D) -> void:
+
 	heroe = nuevo_heroe
 
 
@@ -68,6 +71,7 @@ func _physics_process(delta: float) -> void:
 	# -----------------------------------------------------
 
 	if tiempo_ataque > 0.0:
+
 		tiempo_ataque = maxf(
 			0.0,
 			tiempo_ataque - delta
@@ -81,12 +85,45 @@ func _physics_process(delta: float) -> void:
 	if not is_instance_valid(heroe):
 
 		enemigo_objetivo = null
-		velocity = Vector3.ZERO
+
+		velocity.x = 0.0
+		velocity.z = 0.0
 
 		aplicar_gravedad(delta)
+
 		move_and_slide()
 
 		return
+
+
+	# =====================================================
+	# ZONA SEGURA - MODO PASIVO
+	# =====================================================
+	#
+	# Si el héroe entra al Santuario:
+	#
+	# - El Cadejo cancela cualquier enemigo.
+	# - No busca nuevos enemigos.
+	# - No ataca.
+	# - Regresa junto al héroe.
+	#
+	# Al salir del Santuario volverá automáticamente
+	# a funcionar como protector.
+	# =====================================================
+
+	if heroe.has_method("esta_en_zona_segura"):
+
+		if heroe.esta_en_zona_segura():
+
+			enemigo_objetivo = null
+
+			seguir_heroe()
+
+			aplicar_gravedad(delta)
+
+			move_and_slide()
+
+			return
 
 
 	# -----------------------------------------------------
@@ -97,6 +134,7 @@ func _physics_process(delta: float) -> void:
 		heroe.global_position
 	)
 
+
 	if distancia_total > distancia_maxima:
 
 		global_position = (
@@ -105,6 +143,7 @@ func _physics_process(delta: float) -> void:
 		)
 
 		enemigo_objetivo = null
+
 		velocity = Vector3.ZERO
 
 		return
@@ -115,6 +154,7 @@ func _physics_process(delta: float) -> void:
 	# -----------------------------------------------------
 
 	if not objetivo_es_valido(enemigo_objetivo):
+
 		enemigo_objetivo = null
 
 
@@ -123,6 +163,7 @@ func _physics_process(delta: float) -> void:
 	# -----------------------------------------------------
 
 	if enemigo_objetivo == null:
+
 		enemigo_objetivo = buscar_enemigo_cercano()
 
 
@@ -131,8 +172,11 @@ func _physics_process(delta: float) -> void:
 	# -----------------------------------------------------
 
 	if enemigo_objetivo != null:
+
 		procesar_combate()
+
 	else:
+
 		seguir_heroe()
 
 
@@ -159,12 +203,27 @@ func _physics_process(delta: float) -> void:
 func buscar_enemigo_cercano() -> Node3D:
 
 	if not is_instance_valid(heroe):
+
 		return null
+
+
+	# -----------------------------------------------------
+	# SEGURIDAD EXTRA:
+	# NO BUSCAR ENEMIGOS DENTRO DEL SANTUARIO
+	# -----------------------------------------------------
+
+	if heroe.has_method("esta_en_zona_segura"):
+
+		if heroe.esta_en_zona_segura():
+
+			return null
 
 
 	var escena_actual := get_tree().current_scene
 
+
 	if escena_actual == null:
+
 		return null
 
 
@@ -189,6 +248,7 @@ func buscar_enemigo_cercano() -> Node3D:
 	for candidato in candidatos:
 
 		if not objetivo_es_valido(candidato):
+
 			continue
 
 
@@ -204,6 +264,7 @@ func buscar_enemigo_cercano() -> Node3D:
 
 		# No perseguir amenazas demasiado lejos.
 		if distancia_al_heroe > distancia_maxima_combate_heroe:
+
 			continue
 
 
@@ -254,6 +315,7 @@ func buscar_enemigo_cercano() -> Node3D:
 	for candidato in candidatos:
 
 		if not objetivo_es_valido(candidato):
+
 			continue
 
 
@@ -269,6 +331,7 @@ func buscar_enemigo_cercano() -> Node3D:
 
 		# Solo reaccionar si está dentro del radio protector.
 		if distancia_al_heroe > distancia_deteccion_enemigo:
+
 			continue
 
 
@@ -319,6 +382,7 @@ func _recolectar_enemigos(
 		# -------------------------------------------------
 
 		if hijo == self:
+
 			continue
 
 
@@ -352,7 +416,22 @@ func _recolectar_enemigos(
 func objetivo_es_valido(objetivo: Node) -> bool:
 
 	if not is_instance_valid(objetivo):
+
 		return false
+
+
+	# -----------------------------------------------------
+	# SI EL HÉROE ESTÁ EN ZONA SEGURA,
+	# NO EXISTE NINGÚN OBJETIVO VÁLIDO
+	# -----------------------------------------------------
+
+	if is_instance_valid(heroe):
+
+		if heroe.has_method("esta_en_zona_segura"):
+
+			if heroe.esta_en_zona_segura():
+
+				return false
 
 
 	# -----------------------------------------------------
@@ -360,6 +439,7 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 	# -----------------------------------------------------
 
 	if objetivo == heroe:
+
 		return false
 
 
@@ -368,6 +448,7 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 	# -----------------------------------------------------
 
 	if objetivo == self:
+
 		return false
 
 
@@ -376,6 +457,7 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 	# -----------------------------------------------------
 
 	if objetivo.is_in_group("heroe"):
+
 		return false
 
 
@@ -384,6 +466,7 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 	# -----------------------------------------------------
 
 	if not objetivo is Node3D:
+
 		return false
 
 
@@ -392,6 +475,7 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 	# -----------------------------------------------------
 
 	if not objetivo.has_method("recibir_dano"):
+
 		return false
 
 
@@ -400,6 +484,7 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 	# -----------------------------------------------------
 
 	if not ("esta_muerto" in objetivo):
+
 		return false
 
 
@@ -408,6 +493,7 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 	# -----------------------------------------------------
 
 	if objetivo.esta_muerto:
+
 		return false
 
 
@@ -416,6 +502,7 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 	# -----------------------------------------------------
 
 	if not objetivo.visible:
+
 		return false
 
 
@@ -428,9 +515,32 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 
 func procesar_combate() -> void:
 
+	# -----------------------------------------------------
+	# SEGURIDAD DEL SANTUARIO
+	# -----------------------------------------------------
+
+	if is_instance_valid(heroe):
+
+		if heroe.has_method("esta_en_zona_segura"):
+
+			if heroe.esta_en_zona_segura():
+
+				enemigo_objetivo = null
+
+				velocity.x = 0.0
+				velocity.z = 0.0
+
+				return
+
+
+	# -----------------------------------------------------
+	# VALIDAR OBJETIVO
+	# -----------------------------------------------------
+
 	if not objetivo_es_valido(enemigo_objetivo):
 
 		enemigo_objetivo = null
+
 		return
 
 
@@ -521,10 +631,26 @@ func procesar_combate() -> void:
 func atacar_enemigo() -> void:
 
 	# -----------------------------------------------------
+	# NO ATACAR DENTRO DEL SANTUARIO
+	# -----------------------------------------------------
+
+	if is_instance_valid(heroe):
+
+		if heroe.has_method("esta_en_zona_segura"):
+
+			if heroe.esta_en_zona_segura():
+
+				enemigo_objetivo = null
+
+				return
+
+
+	# -----------------------------------------------------
 	# RECARGA
 	# -----------------------------------------------------
 
 	if tiempo_ataque > 0.0:
+
 		return
 
 
@@ -535,6 +661,7 @@ func atacar_enemigo() -> void:
 	if not objetivo_es_valido(enemigo_objetivo):
 
 		enemigo_objetivo = null
+
 		return
 
 
@@ -545,12 +672,14 @@ func atacar_enemigo() -> void:
 	if enemigo_objetivo == heroe:
 
 		enemigo_objetivo = null
+
 		return
 
 
 	if enemigo_objetivo.is_in_group("heroe"):
 
 		enemigo_objetivo = null
+
 		return
 
 
@@ -647,6 +776,7 @@ func seguir_heroe() -> void:
 func mirar_direccion(direccion: Vector3) -> void:
 
 	if direccion.length_squared() <= 0.0001:
+
 		return
 
 
