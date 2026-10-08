@@ -1,0 +1,240 @@
+[gd_scene format=3 uid="uid://dn1hi6yeg5ccq"]
+
+[ext_resource type="PackedScene" uid="uid://bhiq3iw8eph8y" path="res://CadejoNegro.tscn" id="1_o0goa"]
+[ext_resource type="Script" uid="uid://ba1n56m0xsuw4" path="res://Heroe.gd" id="2_e4lcc"]
+[ext_resource type="Material" uid="uid://b4lcoj1mqmhph" path="res://MaterialPiel.tres" id="3_ym10i"]
+[ext_resource type="Material" uid="uid://c2y66k080fws6" path="res://MaterialPantalon.tres" id="4_k1px0"]
+[ext_resource type="Script" uid="uid://cgi425hsbbcrs" path="res://Camara.gd" id="5_bi2oo"]
+[ext_resource type="Script" uid="uid://b0khvsy334yjx" path="res://HUDInventario.gd" id="6_2jmhv"]
+[ext_resource type="Script" uid="uid://cokjaukgd33hs" path="res://SantuarioCheckpoint.gd" id="7_sxmlx"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_j115u"]
+size = Vector3(40, 0.5, 40)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_e5ioe"]
+size = Vector3(40, 0.5, 40)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_0558y"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pubrj"]
+albedo_color = Color(0.14117648, 0.2901961, 0.4509804, 1)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mfpld"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bl27b"]
+size = Vector3(1.5, 1.5, 2)
+
+[sub_resource type="SphereMesh" id="SphereMesh_5tc4k"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_yihls"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_erkfq"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_e1dhu"]
+radius = 3.0
+
+[node name="BosqueCadejoNegro" type="Node3D" unique_id=830444070]
+
+[node name="Suelo" type="StaticBody3D" parent="." unique_id=241882079]
+
+[node name="MeshSuelo" type="MeshInstance3D" parent="Suelo" unique_id=2043406412]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+mesh = SubResource("BoxMesh_j115u")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Suelo" unique_id=1678061890]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+shape = SubResource("BoxShape3D_e5ioe")
+
+[node name="CadejoNegro" parent="." unique_id=843290446 instance=ExtResource("1_o0goa")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
+
+[node name="Heroe" type="CharacterBody3D" parent="." unique_id=1707605587 groups=["heroe"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 10)
+script = ExtResource("2_e4lcc")
+
+[node name="Cuerpo" type="MeshInstance3D" parent="Heroe" unique_id=630663640]
+mesh = SubResource("CapsuleMesh_0558y")
+surface_material_override/0 = SubResource("StandardMaterial3D_pubrj")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Heroe" unique_id=2124618791]
+shape = SubResource("CapsuleShape3D_mfpld")
+
+[node name="AreaAtaque" type="Area3D" parent="Heroe" unique_id=121363082]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -1.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Heroe/AreaAtaque" unique_id=592940232]
+shape = SubResource("BoxShape3D_bl27b")
+
+[node name="Cabeza" type="MeshInstance3D" parent="Heroe" unique_id=292502848]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
+mesh = SubResource("SphereMesh_5tc4k")
+surface_material_override/0 = ExtResource("3_ym10i")
+
+[node name="BrazoIzquierdo" type="MeshInstance3D" parent="Heroe" unique_id=1152660015]
+transform = Transform3D(0.35, 0, 0, 0, 0.7, 0, 0, 0, 0.35, -0.65, 0.45, 0)
+mesh = SubResource("CapsuleMesh_yihls")
+surface_material_override/0 = ExtResource("3_ym10i")
+
+[node name="BrazoDerecho" type="MeshInstance3D" parent="Heroe" unique_id=480098048]
+transform = Transform3D(0.35, 0, 0, 0, 0.7, 0, 0, 0, 0.35, 0.65, 0.45, 0)
+mesh = SubResource("CapsuleMesh_yihls")
+surface_material_override/0 = ExtResource("3_ym10i")
+
+[node name="PiernaIzquierda" type="MeshInstance3D" parent="Heroe" unique_id=2099429967]
+transform = Transform3D(0.4, 0, 0, 0, 0.65, 0, 0, 0, 0.4, -0.27, -0.85, 0)
+mesh = SubResource("CapsuleMesh_erkfq")
+surface_material_override/0 = ExtResource("4_k1px0")
+
+[node name="PiernaDerecha" type="MeshInstance3D" parent="Heroe" unique_id=892749771]
+transform = Transform3D(0.4, 0, 0, 0, 0.65, 0, 0, 0, 0.4, 0.27, -0.85, 0)
+mesh = SubResource("CapsuleMesh_erkfq")
+surface_material_override/0 = ExtResource("4_k1px0")
+
+[node name="NombreHeroe" type="Label3D" parent="Heroe" unique_id=1797540723]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+billboard = 1
+outline_size = 6
+
+[node name="Camara" type="Camera3D" parent="." unique_id=1163220019]
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 1, 5, 8, 5)
+current = true
+script = ExtResource("5_bi2oo")
+
+[node name="Interfaz" type="CanvasLayer" parent="." unique_id=1232812971]
+
+[node name="BarraVida" type="ProgressBar" parent="Interfaz" unique_id=2100930891]
+offset_left = 30.0
+offset_top = 45.0
+offset_right = 280.0
+offset_bottom = 75.0
+value = 100.0
+
+[node name="TextoVida" type="Label" parent="Interfaz" unique_id=1975329711]
+offset_left = 30.0
+offset_top = 20.0
+offset_right = 70.0
+offset_bottom = 43.0
+
+[node name="TextoNivel" type="Label" parent="Interfaz" unique_id=811063312]
+offset_left = 30.0
+offset_top = 85.0
+offset_right = 70.0
+offset_bottom = 108.0
+
+[node name="TextoExperiencia" type="Label" parent="Interfaz" unique_id=1455277912]
+offset_left = 30.0
+offset_top = 110.0
+offset_right = 70.0
+offset_bottom = 133.0
+
+[node name="BarraExperiencia" type="ProgressBar" parent="Interfaz" unique_id=1997507066]
+offset_left = 30.0
+offset_top = 135.0
+offset_right = 280.0
+offset_bottom = 162.0
+
+[node name="TextoDerrota" type="Label" parent="Interfaz" unique_id=646932876]
+visible = false
+offset_right = 40.0
+offset_bottom = 23.0
+text = "HAS SIDO DERROTADO"
+
+[node name="PuntoRespawn" type="Marker3D" parent="." unique_id=1531805512]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 10)
+
+[node name="HUDInventario" type="CanvasLayer" parent="." unique_id=421663747]
+script = ExtResource("6_2jmhv")
+
+[node name="PanelInventario" type="Panel" parent="HUDInventario" unique_id=371350192]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -1012.0
+offset_top = 30.0
+offset_right = -12.0
+offset_bottom = 630.0
+grow_horizontal = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="TituloInventario" type="Label" parent="HUDInventario/PanelInventario" unique_id=1070946652]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 10.0
+offset_right = 112.0
+offset_bottom = 33.0
+text = "INVENTARIO"
+
+[node name="FragmentosLabel" type="Label" parent="HUDInventario/PanelInventario" unique_id=218441668]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 45.0
+offset_right = 211.0
+offset_bottom = 68.0
+text = "Fragmentos de esencia: 0"
+
+[node name="BotonCerrar" type="Button" parent="HUDInventario/PanelInventario" unique_id=134997789]
+layout_mode = 0
+offset_left = 950.0
+offset_top = 10.0
+offset_right = 990.0
+offset_bottom = 50.0
+text = "X"
+
+[node name="Pestanas" type="HBoxContainer" parent="HUDInventario/PanelInventario" unique_id=950829000]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 65.0
+offset_right = 970.0
+offset_bottom = 115.0
+
+[node name="BotonTodos" type="Button" parent="HUDInventario/PanelInventario/Pestanas" unique_id=931517962]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "TODOS"
+
+[node name="BotonMateriales" type="Button" parent="HUDInventario/PanelInventario/Pestanas" unique_id=236595150]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "MATERIALES"
+
+[node name="BotonConsumibles" type="Button" parent="HUDInventario/PanelInventario/Pestanas" unique_id=617008538]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "CONSUMIBLES"
+
+[node name="BotonEquipo" type="Button" parent="HUDInventario/PanelInventario/Pestanas" unique_id=448673659]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "EQUIPO"
+
+[node name="BotonLegendarios" type="Button" parent="HUDInventario/PanelInventario/Pestanas" unique_id=1782507103]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "LEGENDARIOS"
+
+[node name="ScrollObjetos" type="ScrollContainer" parent="HUDInventario/PanelInventario" unique_id=861239189]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 130.0
+offset_right = 970.0
+offset_bottom = 560.0
+
+[node name="GridObjetos" type="GridContainer" parent="HUDInventario/PanelInventario/ScrollObjetos" unique_id=856923301]
+layout_mode = 2
+columns = 3
+
+[node name="PanelObjetosObtenidos" type="PanelContainer" parent="HUDInventario" unique_id=1181903473]
+offset_left = 30.0
+offset_top = 430.0
+offset_right = 420.0
+offset_bottom = 610.0
+
+[node name="ListaObjetos" type="VBoxContainer" parent="HUDInventario/PanelObjetosObtenidos" unique_id=1315076848]
+layout_mode = 2
+
+[node name="SantuarioCheckpoint" type="Area3D" parent="." unique_id=114173839]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
+script = ExtResource("7_sxmlx")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SantuarioCheckpoint" unique_id=1124766154]
+shape = SubResource("SphereShape3D_e1dhu")
