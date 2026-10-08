@@ -63,18 +63,29 @@ func asignar_heroe(nuevo_heroe: Node3D) -> void:
 
 func _physics_process(delta: float) -> void:
 
+	# -----------------------------------------------------
+	# RECARGA DEL ATAQUE
+	# -----------------------------------------------------
+
 	if tiempo_ataque > 0.0:
 		tiempo_ataque = maxf(
 			0.0,
 			tiempo_ataque - delta
 		)
 
+
+	# -----------------------------------------------------
+	# COMPROBAR HÉROE
+	# -----------------------------------------------------
+
 	if not is_instance_valid(heroe):
+
 		enemigo_objetivo = null
 		velocity = Vector3.ZERO
 
 		aplicar_gravedad(delta)
 		move_and_slide()
+
 		return
 
 
@@ -87,6 +98,7 @@ func _physics_process(delta: float) -> void:
 	)
 
 	if distancia_total > distancia_maxima:
+
 		global_position = (
 			heroe.global_position
 			+ Vector3(1.8, 0.2, 1.8)
@@ -94,6 +106,7 @@ func _physics_process(delta: float) -> void:
 
 		enemigo_objetivo = null
 		velocity = Vector3.ZERO
+
 		return
 
 
@@ -114,7 +127,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# -----------------------------------------------------
-	# COMBATIR O SEGUIR
+	# COMBATIR O SEGUIR AL HÉROE
 	# -----------------------------------------------------
 
 	if enemigo_objetivo != null:
@@ -123,12 +136,24 @@ func _physics_process(delta: float) -> void:
 		seguir_heroe()
 
 
+	# -----------------------------------------------------
+	# GRAVEDAD
+	# -----------------------------------------------------
+
 	aplicar_gravedad(delta)
+
 	move_and_slide()
 
 
 # =========================================================
 # BUSCAR ENEMIGO CERCANO
+# =========================================================
+#
+# PRIORIDAD:
+#
+# 1. Enemigo que está persiguiendo al héroe.
+# 2. Si nadie lo persigue, enemigo cercano al héroe.
+#
 # =========================================================
 
 func buscar_enemigo_cercano() -> Node3D:
@@ -136,27 +161,39 @@ func buscar_enemigo_cercano() -> Node3D:
 	if not is_instance_valid(heroe):
 		return null
 
-	var mejor_enemigo: Node3D = null
-	var mejor_distancia: float = INF
 
 	var escena_actual := get_tree().current_scene
 
 	if escena_actual == null:
 		return null
 
+
 	var candidatos: Array[Node] = []
+
 
 	_recolectar_enemigos(
 		escena_actual,
 		candidatos
 	)
 
+
+	# =====================================================
+	# PRIORIDAD 1
+	# ENEMIGO QUE ESTÁ PERSIGUIENDO AL HÉROE
+	# =====================================================
+
+	var enemigo_agresor: Node3D = null
+	var distancia_agresor: float = INF
+
+
 	for candidato in candidatos:
 
 		if not objetivo_es_valido(candidato):
 			continue
 
+
 		var enemigo := candidato as Node3D
+
 
 		var distancia_al_heroe: float = (
 			enemigo.global_position.distance_to(
@@ -164,9 +201,76 @@ func buscar_enemigo_cercano() -> Node3D:
 			)
 		)
 
-		# Solo defender al héroe de enemigos cercanos.
+
+		# No perseguir amenazas demasiado lejos.
+		if distancia_al_heroe > distancia_maxima_combate_heroe:
+			continue
+
+
+		# -------------------------------------------------
+		# EnemigoPrueba utiliza:
+		#
+		# 0 = QUIETO
+		# 1 = PERSIGUIENDO
+		# 2 = REGRESANDO
+		#
+		# Si está en 1 significa que actualmente
+		# está persiguiendo al héroe.
+		# -------------------------------------------------
+
+		if "estado_actual" in enemigo:
+
+			if int(enemigo.estado_actual) == 1:
+
+				if distancia_al_heroe < distancia_agresor:
+
+					distancia_agresor = distancia_al_heroe
+					enemigo_agresor = enemigo
+
+
+	# -----------------------------------------------------
+	# SI EXISTE UNA AMENAZA ACTIVA, TIENE PRIORIDAD
+	# -----------------------------------------------------
+
+	if enemigo_agresor != null:
+
+		print(
+			"CADEJO BLANCO PROTEGE CONTRA: ",
+			enemigo_agresor.name
+		)
+
+		return enemigo_agresor
+
+
+	# =====================================================
+	# PRIORIDAD 2
+	# ENEMIGO CERCANO AL HÉROE
+	# =====================================================
+
+	var mejor_enemigo: Node3D = null
+	var mejor_distancia: float = INF
+
+
+	for candidato in candidatos:
+
+		if not objetivo_es_valido(candidato):
+			continue
+
+
+		var enemigo := candidato as Node3D
+
+
+		var distancia_al_heroe: float = (
+			enemigo.global_position.distance_to(
+				heroe.global_position
+			)
+		)
+
+
+		# Solo reaccionar si está dentro del radio protector.
 		if distancia_al_heroe > distancia_deteccion_enemigo:
 			continue
+
 
 		var distancia_al_cadejo: float = (
 			global_position.distance_to(
@@ -174,9 +278,12 @@ func buscar_enemigo_cercano() -> Node3D:
 			)
 		)
 
+
 		if distancia_al_cadejo < mejor_distancia:
+
 			mejor_distancia = distancia_al_cadejo
 			mejor_enemigo = enemigo
+
 
 	return mejor_enemigo
 
@@ -192,20 +299,23 @@ func _recolectar_enemigos(
 
 	for hijo in nodo.get_children():
 
+
 		# -------------------------------------------------
-		# NUNCA considerar al héroe como enemigo.
+		# NUNCA CONSIDERAR AL HÉROE COMO ENEMIGO
 		# -------------------------------------------------
 
 		if hijo == heroe:
+
 			_recolectar_enemigos(
 				hijo,
 				resultado
 			)
+
 			continue
 
 
 		# -------------------------------------------------
-		# NUNCA considerar al propio Cadejo.
+		# NUNCA CONSIDERAR AL PROPIO CADEJO
 		# -------------------------------------------------
 
 		if hijo == self:
@@ -221,8 +331,13 @@ func _recolectar_enemigos(
 			and hijo.has_method("recibir_dano")
 			and "esta_muerto" in hijo
 		):
+
 			resultado.append(hijo)
 
+
+		# -------------------------------------------------
+		# CONTINUAR BUSCANDO EN LOS HIJOS
+		# -------------------------------------------------
 
 		_recolectar_enemigos(
 			hijo,
@@ -241,7 +356,7 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 
 
 	# -----------------------------------------------------
-	# PROTECCIÓN ABSOLUTA DEL HÉROE
+	# NUNCA ATACAR AL HÉROE
 	# -----------------------------------------------------
 
 	if objetivo == heroe:
@@ -249,7 +364,7 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 
 
 	# -----------------------------------------------------
-	# EL CADEJO TAMPOCO PUEDE ATACARSE A SÍ MISMO
+	# NUNCA ATACARSE A SÍ MISMO
 	# -----------------------------------------------------
 
 	if objetivo == self:
@@ -257,28 +372,48 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 
 
 	# -----------------------------------------------------
-	# NO ATACAR NODOS DEL GRUPO HÉROE
+	# PROTECCIÓN ADICIONAL POR GRUPO
 	# -----------------------------------------------------
 
 	if objetivo.is_in_group("heroe"):
 		return false
 
 
+	# -----------------------------------------------------
+	# DEBE SER UN NODE3D
+	# -----------------------------------------------------
+
 	if not objetivo is Node3D:
 		return false
 
+
+	# -----------------------------------------------------
+	# DEBE PODER RECIBIR DAÑO
+	# -----------------------------------------------------
 
 	if not objetivo.has_method("recibir_dano"):
 		return false
 
 
+	# -----------------------------------------------------
+	# DEBE TENER ESTADO DE MUERTE
+	# -----------------------------------------------------
+
 	if not ("esta_muerto" in objetivo):
 		return false
 
 
+	# -----------------------------------------------------
+	# NO ATACAR ENEMIGOS MUERTOS
+	# -----------------------------------------------------
+
 	if objetivo.esta_muerto:
 		return false
 
+
+	# -----------------------------------------------------
+	# NO ATACAR ENEMIGOS OCULTOS
+	# -----------------------------------------------------
 
 	if not objetivo.visible:
 		return false
@@ -288,14 +423,16 @@ func objetivo_es_valido(objetivo: Node) -> bool:
 
 
 # =========================================================
-# COMBATE
+# PROCESAR COMBATE
 # =========================================================
 
 func procesar_combate() -> void:
 
 	if not objetivo_es_valido(enemigo_objetivo):
+
 		enemigo_objetivo = null
 		return
+
 
 	var enemigo := enemigo_objetivo as Node3D
 
@@ -309,6 +446,7 @@ func procesar_combate() -> void:
 			heroe.global_position
 		)
 	)
+
 
 	if distancia_enemigo_heroe > distancia_maxima_combate_heroe:
 
@@ -326,7 +464,7 @@ func procesar_combate() -> void:
 
 
 	# -----------------------------------------------------
-	# DISTANCIA AL ENEMIGO
+	# DIRECCIÓN HACIA EL ENEMIGO
 	# -----------------------------------------------------
 
 	var direccion: Vector3 = (
@@ -335,6 +473,7 @@ func procesar_combate() -> void:
 	)
 
 	direccion.y = 0.0
+
 
 	var distancia: float = direccion.length()
 
@@ -358,16 +497,19 @@ func procesar_combate() -> void:
 
 
 	# -----------------------------------------------------
-	# ATACAR
+	# YA ESTÁ A DISTANCIA DE ATAQUE
 	# -----------------------------------------------------
 
 	velocity.x = 0.0
 	velocity.z = 0.0
 
+
 	if distancia > 0.001:
+
 		mirar_direccion(
 			direccion.normalized()
 		)
+
 
 	atacar_enemigo()
 
@@ -378,26 +520,43 @@ func procesar_combate() -> void:
 
 func atacar_enemigo() -> void:
 
+	# -----------------------------------------------------
+	# RECARGA
+	# -----------------------------------------------------
+
 	if tiempo_ataque > 0.0:
 		return
 
 
+	# -----------------------------------------------------
+	# VALIDAR ENEMIGO
+	# -----------------------------------------------------
+
 	if not objetivo_es_valido(enemigo_objetivo):
+
 		enemigo_objetivo = null
 		return
 
 
-	# Protección adicional:
-	# aunque algo falle arriba, jamás atacar al héroe.
+	# -----------------------------------------------------
+	# PROTECCIÓN ABSOLUTA DEL HÉROE
+	# -----------------------------------------------------
+
 	if enemigo_objetivo == heroe:
+
 		enemigo_objetivo = null
 		return
 
 
 	if enemigo_objetivo.is_in_group("heroe"):
+
 		enemigo_objetivo = null
 		return
 
+
+	# -----------------------------------------------------
+	# APLICAR DAÑO
+	# -----------------------------------------------------
 
 	enemigo_objetivo.recibir_dano(
 		dano_ataque
@@ -412,11 +571,15 @@ func atacar_enemigo() -> void:
 	)
 
 
+	# -----------------------------------------------------
+	# INICIAR RECARGA
+	# -----------------------------------------------------
+
 	tiempo_ataque = tiempo_entre_ataques
 
 
 	# -----------------------------------------------------
-	# ENEMIGO DERROTADO
+	# COMPROBAR SI LO DERROTÓ
 	# -----------------------------------------------------
 
 	if not objetivo_es_valido(enemigo_objetivo):
@@ -449,8 +612,13 @@ func seguir_heroe() -> void:
 
 	direccion.y = 0.0
 
+
 	var distancia_horizontal: float = direccion.length()
 
+
+	# -----------------------------------------------------
+	# ACERCARSE AL HÉROE
+	# -----------------------------------------------------
 
 	if distancia_horizontal > distancia_seguimiento:
 
@@ -460,6 +628,11 @@ func seguir_heroe() -> void:
 		velocity.z = direccion.z * velocidad
 
 		mirar_direccion(direccion)
+
+
+	# -----------------------------------------------------
+	# QUEDARSE JUNTO AL HÉROE
+	# -----------------------------------------------------
 
 	else:
 
@@ -477,8 +650,13 @@ func mirar_direccion(direccion: Vector3) -> void:
 		return
 
 
+	# -----------------------------------------------------
 	# El modelo visual del Cadejo mira hacia -Z.
-	# Conservamos la corrección de 180 grados ya probada.
+	#
+	# + PI conserva la corrección de orientación
+	# que ya probamos anteriormente.
+	# -----------------------------------------------------
+
 	var angulo_objetivo: float = (
 		atan2(
 			direccion.x,
@@ -503,6 +681,9 @@ func mirar_direccion(direccion: Vector3) -> void:
 func aplicar_gravedad(delta: float) -> void:
 
 	if not is_on_floor():
+
 		velocity.y -= gravity * delta
+
 	else:
+
 		velocity.y = 0.0
