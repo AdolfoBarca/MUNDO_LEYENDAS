@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://c320vyayp7dqi" path="res://MiniCipitio.tscn" id="6_trn2v"]
 [ext_resource type="Script" uid="uid://b0khvsy334yjx" path="res://HUDInventario.gd" id="7_lgr22"]
 [ext_resource type="Script" uid="uid://d0qkxc03o7kep" path="res://SistemaDrops.gd" id="7_trn2v"]
+[ext_resource type="Script" uid="uid://cm0piwrmu33fk" path="res://EncuentroCadejoBlanco.gd" id="10_wkp8b"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_j115u"]
 size = Vector2(30, 30)
@@ -348,3 +349,7 @@ offset_top = 70.0
 offset_right = 385.0
 offset_bottom = 280.0
 columns = 4
+
+[node name="EncuentroCadejoBlanco" type="Node3D" parent="." unique_id=1162317572]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1, 9)
+script = ExtResource("10_wkp8b")

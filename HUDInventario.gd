@@ -22,7 +22,7 @@ const SLOT_INVENTARIO = preload("res://SlotInventario.tscn")
 # FILTRO ACTUAL
 # =========================================================
 var filtro_actual: String = "Todos"
-var historial_visible_antes_de_abrir: bool = true
+var aviso_generacion: int = 0
 # Ventana de inspección, creada sin modificar la escena.
 var capa_detalles: Control
 var imagen_detalle: TextureRect
@@ -67,6 +67,7 @@ const MARGEN_INFERIOR: int = 5
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	panel_inventario.visible = false
+	panel_objetos_obtenidos.visible = false
 	if fragmentos_label != null:
 		fragmentos_label.visible = false
 	# =====================================================
@@ -158,7 +159,6 @@ func abrir_inventario() -> void:
 	filtro_actual = "Todos"
 	actualizar_inventario()
 	actualizar_estilo_pestanas()
-	historial_visible_antes_de_abrir = panel_objetos_obtenidos.visible
 	panel_objetos_obtenidos.visible = false
 	panel_inventario.visible = true
 	scroll_objetos.scroll_vertical = 0
@@ -169,7 +169,7 @@ func abrir_inventario() -> void:
 func cerrar_inventario() -> void:
 	cerrar_detalles()
 	panel_inventario.visible = false
-	panel_objetos_obtenidos.visible = historial_visible_antes_de_abrir
+	panel_objetos_obtenidos.visible = false
 	get_tree().paused = false
 # =========================================================
 # CAMBIAR FILTRO
@@ -269,6 +269,11 @@ func mostrar_objeto_obtenido(
 ) -> void:
 	if cantidad <= 0:
 		return
+	aviso_generacion += 1
+	var generacion_actual: int = aviso_generacion
+	if not panel_inventario.visible:
+		panel_objetos_obtenidos.visible = true
+	_ocultar_avisos_despues(generacion_actual)
 	# =====================================================
 	# DATOS DEL OBJETO
 	# =====================================================
@@ -396,6 +401,14 @@ func desplazar_historial_al_final() -> void:
 	var barra: VScrollBar = scroll_avisos.get_v_scroll_bar()
 	scroll_avisos.scroll_vertical = int(maxf(0.0, barra.max_value - barra.page))
 # =========================================================
+# Ocultar solo el panel; conservar el historial y sus iconos.
+func _ocultar_avisos_despues(generacion: int) -> void:
+	await get_tree().create_timer(DURACION_AVISO, true).timeout
+	if not is_inside_tree():
+		return
+	if generacion != aviso_generacion:
+		return
+	panel_objetos_obtenidos.visible = false
 # HISTORIAL DESPLAZABLE DE RECOMPENSAS
 # =========================================================
 func configurar_historial_avisos() -> void:
@@ -816,7 +829,6 @@ func mostrar_detalles(objeto: Dictionary) -> void:
 			texto += "\n\nESTADO: GUARDADO EN INVENTARIO"
 			boton_tecomate.text = "Equipar Tecomate"
 			boton_tecomate.disabled = not DatosJugador.tiene_tecomate_espiritus()
-
 	informacion_detalle.text = texto
 	capa_detalles.visible = true
 	if scroll_detalles != null:
@@ -828,8 +840,6 @@ func alternar_tecomate() -> void:
 	else:
 		DatosJugador.equipar_tecomate()
 	mostrar_detalles(DatosJugador.obtener_objeto(DatosJugador.ID_TECOMATE_ESPIRITUS))
-
-
 func cambiar_zoom(cambio: float) -> void:
 	establecer_zoom(zoom_detalle + cambio)
 func establecer_zoom(nuevo_zoom: float) -> void:
