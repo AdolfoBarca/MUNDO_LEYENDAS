@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dn1hi6yeg5ccq"]
 
 [ext_resource type="PackedScene" uid="uid://bhiq3iw8eph8y" path="res://CadejoNegro.tscn" id="1_o0goa"]
+[ext_resource type="Script" uid="uid://bayywlehgktpv" path="res://PruebaTecomateCadejoNegro.gd" id="1_ym10i"]
 [ext_resource type="Script" uid="uid://ba1n56m0xsuw4" path="res://Heroe.gd" id="2_e4lcc"]
 [ext_resource type="Material" uid="uid://b4lcoj1mqmhph" path="res://MaterialPiel.tres" id="3_ym10i"]
 [ext_resource type="Material" uid="uid://c2y66k080fws6" path="res://MaterialPantalon.tres" id="4_k1px0"]
@@ -34,6 +35,7 @@ size = Vector3(1.5, 1.5, 2)
 radius = 3.0
 
 [node name="BosqueCadejoNegro" type="Node3D" unique_id=830444070]
+script = ExtResource("1_ym10i")
 
 [node name="Suelo" type="StaticBody3D" parent="." unique_id=241882079]
 
