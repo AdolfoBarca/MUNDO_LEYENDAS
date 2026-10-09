@@ -63,7 +63,9 @@ var esta_muerto: bool = false
 # =========================================================
 
 var heroe: CharacterBody3D = null
+
 var cadejo_objetivo: CharacterBody3D = null
+
 @export var distancia_proteccion_cadejo: float = 3.0
 
 @onready var vida_label: Label3D = $VidaLabel
@@ -347,12 +349,19 @@ func _physics_process(delta: float) -> void:
             # PERSEGUIR O ATACAR
 
             var objetivo_combate: CharacterBody3D = elegir_objetivo_combate()
+
             if objetivo_combate == null:
+
                 velocity = Vector3.ZERO
+
             elif distancia_horizontal_a(objetivo_combate) > distancia_ataque:
+
                 mover_hacia_posicion_objetivo(objetivo_combate.global_position)
+
             else:
+
                 velocity = Vector3.ZERO
+
                 atacar_objetivo(objetivo_combate)
 
         # =================================================
@@ -478,84 +487,151 @@ func mover_hacia_posicion(destino: Vector3) -> void:
 # =========================================================
 
 # =========================================================
+
 # OBJETIVOS DE COMBATE: HEROE O CADEJO BLANCO
+
 # =========================================================
 
 func distancia_horizontal_a(objetivo: Node3D) -> float:
+
     var diferencia: Vector3 = objetivo.global_position - global_position
+
     diferencia.y = 0.0
+
     return diferencia.length()
 
 func elegir_objetivo_combate() -> CharacterBody3D:
+
     cadejo_objetivo = null
+
     if not is_instance_valid(heroe):
+
         return null
+
     if heroe.has_method("esta_en_zona_segura") and heroe.esta_en_zona_segura():
+
         return null
+
     # Solo protege si esta invocado, activo y suficientemente cerca.
+
     for nodo in get_tree().get_nodes_in_group("cadejo_blanco"):
+
         if candidato_cadejo_valido(nodo):
+
             cadejo_objetivo = nodo as CharacterBody3D
+
             break
+
     # Respaldo para escenas donde el Cadejo aun no pertenece al grupo.
+
     if cadejo_objetivo == null:
+
         var escena: Node = get_tree().current_scene
+
         if escena != null:
+
             cadejo_objetivo = buscar_cadejo_en_arbol(escena)
+
     if cadejo_objetivo != null:
+
         return cadejo_objetivo
+
     return heroe
 
 func buscar_cadejo_en_arbol(nodo: Node) -> CharacterBody3D:
+
     if candidato_cadejo_valido(nodo):
+
         return nodo as CharacterBody3D
+
     for hijo in nodo.get_children():
+
         var encontrado: CharacterBody3D = buscar_cadejo_en_arbol(hijo)
+
         if encontrado != null:
+
             return encontrado
+
     return null
 
 func candidato_cadejo_valido(nodo: Node) -> bool:
+
     if not is_instance_valid(nodo) or not nodo is CharacterBody3D:
+
         return false
+
     if nodo == heroe or not nodo.has_method("recibir_dano"):
+
         return false
+
     if not (nodo.name.begins_with("CadejoBlanco") or nodo.is_in_group("cadejo_blanco")):
+
         return false
+
     if "agotado" in nodo and bool(nodo.agotado):
+
         return false
+
     if not nodo.visible or not nodo.is_inside_tree():
+
         return false
+
     if distancia_horizontal_a(nodo) > distancia_proteccion_cadejo:
+
         return false
+
     if nodo.global_position.distance_to(heroe.global_position) > 10.0:
+
         return false
+
     return true
 
 func mover_hacia_posicion_objetivo(destino: Vector3) -> void:
+
     mover_hacia_posicion(destino)
+
     var direccion: Vector3 = destino - global_position
+
     direccion.y = 0.0
+
     if direccion.length_squared() > 0.0001:
+
         look_at(global_position + direccion, Vector3.UP)
 
 func atacar_objetivo(objetivo: CharacterBody3D) -> void:
+
     if tiempo_ataque > 0.0 or not is_instance_valid(objetivo):
+
         return
+
     if not is_instance_valid(heroe):
+
         return
+
     if heroe.has_method("esta_en_zona_segura") and heroe.esta_en_zona_segura():
+
         estado_actual = Estado.REGRESANDO
+
         return
+
     if not objetivo.has_method("recibir_dano"):
+
         return
+
     if objetivo != heroe and not candidato_cadejo_valido(objetivo):
+
         return
+
     if distancia_horizontal_a(objetivo) > distancia_ataque + 0.15:
+
         return
+
     objetivo.recibir_dano(ataque_base)
+
     tiempo_ataque = tiempo_entre_ataques
+
     if objetivo != heroe:
+
         print(name, " ATACO AL CADEJO BLANCO | DAÑO BASE: ", ataque_base)
 
 # ATAQUE DEL ENEMIGO
@@ -721,6 +797,14 @@ func morir() -> void:
         if heroe.has_method("ganar_experiencia"):
 
             heroe.ganar_experiencia(100)
+
+    # XP del Cadejo Blanco solo si participó en esta derrota.
+    # El enemigo entrega la recompensa una vez por muerte, no por golpe.
+    if is_instance_valid(heroe):
+        var companero = heroe.get("cadejo_blanco_activo")
+        if is_instance_valid(companero) and companero.has_method("conceder_xp_por_derrota"):
+            companero.conceder_xp_por_derrota(self, 20)
+
 
     print(
 
