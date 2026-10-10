@@ -95,6 +95,44 @@ var checkpoint_activado: bool = false
 @export var experiencia_para_siguiente_nivel: int = 100
 var experiencia_actual: int = 0
 # =========================================================
+# GUARDADO PERMANENTE DEL HEROE
+# =========================================================
+const ARCHIVO_PROGRESO_HEROE: String = "user://progreso_heroe.save"
+func guardar_progreso_heroe() -> void:
+    var datos: Dictionary = {
+        "nivel": nivel,
+        "experiencia_actual": experiencia_actual
+    }
+    var archivo: FileAccess = FileAccess.open(ARCHIVO_PROGRESO_HEROE, FileAccess.WRITE)
+    if archivo == null:
+        push_error("No se pudo guardar el progreso del héroe: " + str(FileAccess.get_open_error()))
+        return
+    archivo.store_var(datos)
+    archivo.close()
+    print("PROGRESO HEROE GUARDADO | Nivel: ", nivel, " | XP: ", experiencia_actual)
+func cargar_progreso_heroe() -> void:
+    if not FileAccess.file_exists(ARCHIVO_PROGRESO_HEROE):
+        print("HEROE: sin archivo de progreso; comienza desde el nivel inicial.")
+        return
+    var archivo: FileAccess = FileAccess.open(ARCHIVO_PROGRESO_HEROE, FileAccess.READ)
+    if archivo == null:
+        push_error("No se pudo leer el progreso del héroe: " + str(FileAccess.get_open_error()))
+        return
+    var datos: Variant = archivo.get_var()
+    archivo.close()
+    if not datos is Dictionary:
+        push_warning("Archivo de progreso del héroe inválido.")
+        return
+    nivel = maxi(1, int(datos.get("nivel", 1)))
+    experiencia_para_siguiente_nivel = 100 + (nivel - 1) * 50
+    experiencia_actual = clampi(int(datos.get("experiencia_actual", 0)), 0, experiencia_para_siguiente_nivel - 1)
+    reconstruir_estadisticas_heroe()
+    print("PROGRESO HEROE CARGADO | Nivel: ", nivel, " | XP: ", experiencia_actual)
+func reconstruir_estadisticas_heroe() -> void:
+    vida_maxima = 100 + (nivel - 1) * 10
+    dano = 20 + (nivel - 1) * 2
+    defensa = 3 + (nivel - 1)
+# =========================================================
 # APARIENCIA
 # =========================================================
 @export var color_piel: Color = Color("#C98F65")
@@ -165,6 +203,7 @@ func _ready() -> void:
     if not DatosJugador.tecomate_actualizado.is_connected(al_actualizar_tecomate):
         DatosJugador.tecomate_actualizado.connect(al_actualizar_tecomate)
     call_deferred("al_actualizar_companero", DatosJugador.obtener_companero_activo())
+    cargar_progreso_heroe()
     vida_actual = vida_maxima
     pe_actual = float(pe_maximo)
     tiempo_desde_ultimo_gasto_pe = espera_para_regenerar_pe
@@ -322,6 +361,7 @@ func recibir_experiencia(cantidad: int) -> void:
     print("==============================")
     comprobar_subida_nivel()
     actualizar_interfaz()
+    guardar_progreso_heroe()
 func ganar_experiencia(cantidad: int) -> void:
     recibir_experiencia(cantidad)
 func comprobar_subida_nivel() -> void:
@@ -339,6 +379,7 @@ func subir_nivel() -> void:
     vida_actual = vida_maxima
     experiencia_para_siguiente_nivel += 50
     actualizar_interfaz()
+    guardar_progreso_heroe()
     print("")
     print("================================")
     print("¡SUBIDA DE NIVEL!")
@@ -687,14 +728,12 @@ func al_agotarse_cadejo_blanco() -> void:
     # La retirada normal libera la escena y mantiene sincronizado DatosJugador.
     DatosJugador.retirar_companero_activo()
     retirar_cadejo_blanco()
-
 func actualizar_recuperacion_cadejo(delta: float) -> void:
     if recarga_cadejo_restante <= 0.0:
         return
     recarga_cadejo_restante = maxf(0.0, recarga_cadejo_restante - delta)
     if recarga_cadejo_restante <= 0.0:
         print("CADEJO BLANCO RECUPERADO: 300/300 | Pulsa R para invocarlo.")
-
 func alternar_cadejo_blanco_prueba() -> void:
     if is_instance_valid(cadejo_blanco_activo):
         DatosJugador.retirar_companero_activo()
