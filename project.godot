@@ -8,16 +8,18 @@
 
 config_version=5
 
+
 [application]
 
 config/name="MUNDO_LEYENDAS"
-run/main_scene="uid://xbq8et6w2orm"
+run/main_scene="uid://dt11witlpir5w"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
 [autoload]
 
-DatosJugador="*uid://dx8rg4etnq51g"
+DatosJugador="*res://DatosJugador.gd"
+HudCadejo="*res://HUDCadejo.gd"
 
 [display]
 
