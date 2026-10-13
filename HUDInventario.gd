@@ -88,6 +88,8 @@ func _ready() -> void:
         DatosJugador.objeto_obtenido.connect(
             mostrar_objeto_obtenido
         )
+    if not DatosJugador.evento_aventura.is_connected(mostrar_evento_aventura):
+        DatosJugador.evento_aventura.connect(mostrar_evento_aventura)
     # =====================================================
     # BOTÓN CERRAR
     # =====================================================
@@ -392,6 +394,58 @@ func mostrar_objeto_obtenido(
     # Los mensajes nuevos aparecen abajo y el historial los sigue.
     if scroll_avisos != null:
         desplazar_historial_al_final()
+# Eventos de combate dentro del mismo historial de drops.
+func mostrar_evento_aventura(mensaje: String, tipo: String = "info") -> void:
+    aviso_generacion += 1
+    var generacion_actual: int = aviso_generacion
+    if not panel_inventario.visible:
+        panel_objetos_obtenidos.visible = true
+    _ocultar_avisos_despues(generacion_actual)
+    var margen := MarginContainer.new()
+    margen.add_theme_constant_override("margin_left", MARGEN_IZQUIERDO)
+    margen.add_theme_constant_override("margin_right", MARGEN_DERECHO)
+    margen.add_theme_constant_override("margin_top", MARGEN_SUPERIOR)
+    margen.add_theme_constant_override("margin_bottom", MARGEN_INFERIOR)
+    margen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    lista_objetos.add_child(margen)
+    var fila := HBoxContainer.new()
+    fila.add_theme_constant_override("separation", 7)
+    margen.add_child(fila)
+    var icono := Label.new()
+    var color: Color = Color.WHITE
+    match tipo:
+        "peligro":
+            icono.text = "✖"
+            color = Color("#FF8888")
+        "advertencia":
+            icono.text = "!"
+            color = Color("#FFD46B")
+        "exito":
+            icono.text = "★"
+            color = Color("#81DF9A")
+        "legendario":
+            icono.text = "★"
+            color = Color("#E8C16A")
+        _:
+            icono.text = "•"
+            color = Color("#B8D7FF")
+    icono.add_theme_color_override("font_color", color)
+    icono.add_theme_font_size_override("font_size", 20)
+    fila.add_child(icono)
+    var texto := Label.new()
+    texto.text = mensaje
+    texto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    texto.add_theme_font_size_override("font_size", 17)
+    texto.add_theme_color_override("font_color", color)
+    fila.add_child(texto)
+    while lista_objetos.get_child_count() > MAX_AVISOS:
+        var antiguo := lista_objetos.get_child(0)
+        lista_objetos.remove_child(antiguo)
+        antiguo.queue_free()
+    if scroll_avisos != null:
+        desplazar_historial_al_final()
+
 # Esperar a que los controles calculen su altura antes de bajar.
 func desplazar_historial_al_final() -> void:
     await get_tree().process_frame

@@ -1,6 +1,7 @@
 extends Node
 signal inventario_actualizado
 signal objeto_obtenido(id_objeto: String, cantidad: int)
+signal evento_aventura(mensaje: String, tipo: String)
 signal carta_desbloqueada(id_carta: String)
 signal equipamiento_actualizado
 signal tecomate_actualizado
@@ -103,6 +104,76 @@ const NIVEL_MAXIMO_CADEJO: int = 100
 var nivel_cadejo_blanco: int = 1
 var xp_cadejo_blanco: int = 0
 const ARCHIVO_PROGRESO_CADEJO: String = "user://progreso_cadejo_blanco.save"
+# Descanso espiritual: 5% de vida maxima cada 10 segundos.
+const INTERVALO_DESCANSO_CADEJO: int = 10
+const PORCENTAJE_DESCANSO_CADEJO: float = 0.05
+var vida_guardada_cadejo: int = -1
+var inicio_descanso_cadejo: int = 0
+var resto_descanso_cadejo: int = 0
+var fin_agotamiento_cadejo: int = 0
+
+func avisar_evento(mensaje: String, tipo: String = "info") -> void:
+    evento_aventura.emit(mensaje, tipo)
+
+func vida_minima_invocacion_cadejo() -> int:
+    return ceili(float(vida_maxima_cadejo_blanco()) * 0.5)
+
+func puede_invocar_cadejo_por_vida() -> bool:
+    actualizar_descanso_cadejo()
+    if vida_guardada_cadejo < 0:
+        return true
+    return vida_guardada_cadejo >= vida_minima_invocacion_cadejo()
+
+func vida_maxima_cadejo_blanco() -> int:
+    return 300 + (nivel_cadejo_blanco - 1) * 25
+
+func guardar_vida_cadejo(vida: int, agotado: bool = false, segundos_agotamiento: int = 30) -> void:
+    vida_guardada_cadejo = clampi(vida, 0, vida_maxima_cadejo_blanco())
+    var ahora: int = int(Time.get_unix_time_from_system())
+    if agotado:
+        vida_guardada_cadejo = 0
+        fin_agotamiento_cadejo = ahora + segundos_agotamiento
+        inicio_descanso_cadejo = fin_agotamiento_cadejo
+        resto_descanso_cadejo = 0
+    else:
+        fin_agotamiento_cadejo = 0
+        inicio_descanso_cadejo = ahora
+    guardar_progreso_cadejo_blanco()
+
+func segundos_agotamiento_restantes() -> int:
+    return maxi(0, fin_agotamiento_cadejo - int(Time.get_unix_time_from_system()))
+
+func actualizar_descanso_cadejo() -> void:
+    if vida_guardada_cadejo < 0 or inicio_descanso_cadejo <= 0:
+        return
+    var ahora: int = int(Time.get_unix_time_from_system())
+    if ahora < inicio_descanso_cadejo:
+        return
+    var total: int = ahora - inicio_descanso_cadejo + resto_descanso_cadejo
+    var pulsos: int = total / INTERVALO_DESCANSO_CADEJO
+    if pulsos <= 0:
+        return
+    var cura: int = maxi(1, roundi(float(vida_maxima_cadejo_blanco()) * PORCENTAJE_DESCANSO_CADEJO))
+    vida_guardada_cadejo = mini(vida_maxima_cadejo_blanco(), vida_guardada_cadejo + pulsos * cura)
+    resto_descanso_cadejo = total % INTERVALO_DESCANSO_CADEJO
+    inicio_descanso_cadejo = ahora
+    if vida_guardada_cadejo >= vida_maxima_cadejo_blanco():
+        resto_descanso_cadejo = 0
+    guardar_progreso_cadejo_blanco()
+
+func obtener_vida_para_invocar_cadejo() -> int:
+    actualizar_descanso_cadejo()
+    if vida_guardada_cadejo < 0:
+        vida_guardada_cadejo = vida_maxima_cadejo_blanco()
+    # No permitir una invocación con vida insuficiente.
+    if segundos_agotamiento_restantes() > 0 or vida_guardada_cadejo < vida_minima_invocacion_cadejo():
+        return 0
+    inicio_descanso_cadejo = 0
+    resto_descanso_cadejo = 0
+    fin_agotamiento_cadejo = 0
+    guardar_progreso_cadejo_blanco()
+    return clampi(vida_guardada_cadejo, 1, vida_maxima_cadejo_blanco())
+
 func guardar_progreso_cadejo_blanco() -> void:
     var archivo: FileAccess = FileAccess.open(ARCHIVO_PROGRESO_CADEJO, FileAccess.WRITE)
     if archivo == null:
@@ -110,7 +181,11 @@ func guardar_progreso_cadejo_blanco() -> void:
         return
     var datos: Dictionary = {
         "nivel": nivel_cadejo_blanco,
-        "xp": xp_cadejo_blanco
+        "xp": xp_cadejo_blanco,
+        "vida": vida_guardada_cadejo,
+        "inicio_descanso": inicio_descanso_cadejo,
+        "resto_descanso": resto_descanso_cadejo,
+        "fin_agotamiento": fin_agotamiento_cadejo
     }
     archivo.store_var(datos)
     archivo.close()
@@ -132,6 +207,10 @@ func cargar_progreso_cadejo_blanco() -> void:
     var nivel_cargado: int = clampi(int(datos.get("nivel", 1)), 1, NIVEL_MAXIMO_CADEJO)
     var xp_cargada: int = maxi(0, int(datos.get("xp", 0)))
     nivel_cadejo_blanco = nivel_cargado
+    vida_guardada_cadejo = clampi(int(datos.get("vida", -1)), -1, vida_maxima_cadejo_blanco())
+    inicio_descanso_cadejo = maxi(0, int(datos.get("inicio_descanso", 0)))
+    resto_descanso_cadejo = clampi(int(datos.get("resto_descanso", 0)), 0, 9)
+    fin_agotamiento_cadejo = maxi(0, int(datos.get("fin_agotamiento", 0)))
     if nivel_cadejo_blanco >= NIVEL_MAXIMO_CADEJO:
         xp_cadejo_blanco = 0
     else:

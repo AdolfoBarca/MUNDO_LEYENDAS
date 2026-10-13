@@ -85,6 +85,7 @@ func recibir_dano(cantidad: int) -> void:
     var dano_real: int = maxi(1, roundi(float(cantidad) * (1.0 - reduccion_dano)))
     vida_actual = maxi(0, vida_actual - dano_real)
     actualizar_barra_vida()
+    DatosJugador.vida_guardada_cadejo = vida_actual
     print("CADEJO BLANCO RECIBE ", dano_real, " DAÑO | VIDA: ", vida_actual, "/", vida_maxima)
     if vida_actual == 0:
         agotado = true
@@ -125,6 +126,7 @@ func conceder_xp_por_derrota(enemigo: Node, xp: int) -> void:
 func _ready() -> void:
     vida_actual = vida_maxima
     actualizar_nivel_cadejo()
+    vida_actual = DatosJugador.obtener_vida_para_invocar_cadejo()
     crear_barra_vida()
     print("==============================")
     print("CADEJO BLANCO LISTO")

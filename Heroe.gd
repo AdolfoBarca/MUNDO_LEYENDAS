@@ -355,6 +355,10 @@ func recibir_experiencia(cantidad: int) -> void:
     if cantidad <= 0:
         return
     experiencia_actual += cantidad
+    if cantidad == 500:
+        DatosJugador.avisar_evento("¡MVP derrotado: Cipitío Legendario!", "legendario")
+    elif cantidad == 750:
+        DatosJugador.avisar_evento("¡MVP derrotado: Cadejo Negro!", "legendario")
     print("==============================")
     print("+", cantidad, " XP")
     print("EXPERIENCIA: ", experiencia_actual, "/", experiencia_para_siguiente_nivel)
@@ -719,28 +723,42 @@ func crear_efecto_visual_ceniza() -> void:
 # ACTIVAR SOLO PARA PROBAR EL CADEJO ANTES DE SU MISION DE CAPTURA.
 # Cuando la captura esté implementada, cambiar a false.
 @export var permitir_cadejo_blanco_en_pruebas: bool = true
+func _exit_tree() -> void:
+    if is_instance_valid(cadejo_blanco_activo) and not bool(cadejo_blanco_activo.get("agotado")):
+        DatosJugador.guardar_vida_cadejo(int(cadejo_blanco_activo.get("vida_actual")))
+
 func al_agotarse_cadejo_blanco() -> void:
-    # Bloquear inmediatamente la invocación, incluso ante señales del inventario.
-    if recarga_cadejo_restante > 0.0:
+    if DatosJugador.segundos_agotamiento_restantes() > 0:
         return
-    recarga_cadejo_restante = maxf(0.0, tiempo_recuperacion_cadejo)
-    print("CADEJO BLANCO REGRESA AL TECOMATE | RECUPERACIÓN: %.0f s" % recarga_cadejo_restante)
-    # La retirada normal libera la escena y mantiene sincronizado DatosJugador.
+    DatosJugador.guardar_vida_cadejo(0, true, roundi(tiempo_recuperacion_cadejo))
+    DatosJugador.avisar_evento("¡Tu Cadejo Blanco ha caído! Agotamiento espiritual: 30 segundos.", "peligro")
+    recarga_cadejo_restante = float(DatosJugador.segundos_agotamiento_restantes())
+    print("CADEJO BLANCO AGOTADO | Espera: %.0f s" % recarga_cadejo_restante)
     DatosJugador.retirar_companero_activo()
     retirar_cadejo_blanco()
-func actualizar_recuperacion_cadejo(delta: float) -> void:
-    if recarga_cadejo_restante <= 0.0:
-        return
-    recarga_cadejo_restante = maxf(0.0, recarga_cadejo_restante - delta)
-    if recarga_cadejo_restante <= 0.0:
-        print("CADEJO BLANCO RECUPERADO: 300/300 | Pulsa R para invocarlo.")
+
+func actualizar_recuperacion_cadejo(_delta: float) -> void:
+    var anterior: float = recarga_cadejo_restante
+    recarga_cadejo_restante = float(DatosJugador.segundos_agotamiento_restantes())
+    if anterior > 0.0 and recarga_cadejo_restante <= 0.0:
+        print("CADEJO BLANCO: agotamiento terminado. Debe recuperar el 50% de vida.")
+        if DatosJugador.puede_invocar_cadejo_por_vida():
+            DatosJugador.avisar_evento("¡Cadejo Blanco recuperado! Ya puedes invocarlo.", "exito")
+        else:
+            DatosJugador.avisar_evento("Agotamiento terminado. El Cadejo necesita recuperar 50% de vida.", "info")
+
 func alternar_cadejo_blanco_prueba() -> void:
     if is_instance_valid(cadejo_blanco_activo):
         DatosJugador.retirar_companero_activo()
         retirar_cadejo_blanco()
         return
-    if recarga_cadejo_restante > 0.0:
-        print("CADEJO BLANCO AGOTADO: faltan %.1f segundos." % recarga_cadejo_restante)
+    if DatosJugador.segundos_agotamiento_restantes() > 0:
+        var faltan: int = DatosJugador.segundos_agotamiento_restantes()
+        print("CADEJO BLANCO AGOTADO: faltan %d segundos." % faltan)
+        DatosJugador.avisar_evento("No puedes invocar al Cadejo: agotamiento espiritual (%d s)." % faltan, "peligro")
+        return
+    if not DatosJugador.puede_invocar_cadejo_por_vida():
+        DatosJugador.avisar_evento("No puedes invocar al Cadejo: necesita al menos %d/%d HP (50%%)." % [DatosJugador.vida_minima_invocacion_cadejo(), DatosJugador.vida_maxima_cadejo_blanco()], "advertencia")
         return
     if not DatosJugador.tecomate_esta_equipado():
         print("CADEJO BLANCO: equipa primero el Tecomate de los Espíritus.")
@@ -756,7 +774,9 @@ func alternar_cadejo_blanco_prueba() -> void:
         return
     invocar_cadejo_blanco()
 func invocar_cadejo_blanco() -> void:
-    if recarga_cadejo_restante > 0.0:
+    if not DatosJugador.puede_invocar_cadejo_por_vida():
+        return
+    if DatosJugador.segundos_agotamiento_restantes() > 0:
         return
     if is_instance_valid(cadejo_blanco_activo):
         return
@@ -783,10 +803,15 @@ func invocar_cadejo_blanco() -> void:
     if nuevo_cadejo.has_signal("agotamiento_espiritual"):
         nuevo_cadejo.connect("agotamiento_espiritual", Callable(self, "al_agotarse_cadejo_blanco"))
     print("CADEJO BLANCO INVOCADO MEDIANTE EL TECOMATE")
+    DatosJugador.avisar_evento("¡Cadejo Blanco invocado!", "exito")
 func retirar_cadejo_blanco() -> void:
-    if is_instance_valid(cadejo_blanco_activo):
-        cadejo_blanco_activo.queue_free()
+    var anterior: Node3D = cadejo_blanco_activo
     cadejo_blanco_activo = null
+    if is_instance_valid(anterior):
+        if DatosJugador.segundos_agotamiento_restantes() <= 0 and not bool(anterior.get("agotado")):
+            DatosJugador.guardar_vida_cadejo(int(anterior.get("vida_actual")))
+            DatosJugador.avisar_evento("Cadejo Blanco guardado en el Tecomate: %d/%d HP." % [int(anterior.get("vida_actual")), DatosJugador.vida_maxima_cadejo_blanco()], "info")
+        anterior.queue_free()
     print("CADEJO BLANCO RETIRADO")
 func al_actualizar_companero(id_companero: String) -> void:
     if id_companero == "cadejo_blanco" and DatosJugador.tecomate_esta_equipado():
