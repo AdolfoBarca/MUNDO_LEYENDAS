@@ -164,6 +164,10 @@ func abrir_inventario() -> void:
     panel_objetos_obtenidos.visible = false
     panel_inventario.visible = true
     scroll_objetos.scroll_vertical = 0
+    # El HUD del Cadejo no debe tapar el inventario.
+    var hud_cadejo: Node = get_node_or_null("/root/HUDCadejo")
+    if hud_cadejo != null:
+        hud_cadejo.establecer_inventario_abierto(true)
     get_tree().paused = true
 # =========================================================
 # CERRAR INVENTARIO
@@ -172,6 +176,9 @@ func cerrar_inventario() -> void:
     cerrar_detalles()
     panel_inventario.visible = false
     panel_objetos_obtenidos.visible = false
+    var hud_cadejo: Node = get_node_or_null("/root/HUDCadejo")
+    if hud_cadejo != null:
+        hud_cadejo.establecer_inventario_abierto(false)
     get_tree().paused = false
 # =========================================================
 # CAMBIAR FILTRO
