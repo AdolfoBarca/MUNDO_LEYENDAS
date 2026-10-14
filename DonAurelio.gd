@@ -1,4 +1,3 @@
-
 extends CharacterBody3D
 
 const DIALOGOS: Array[String] = [
@@ -28,6 +27,7 @@ func _ready() -> void:
     area.body_entered.connect(_al_entrar)
     area.body_exited.connect(_al_salir)
 
+    mision_entregada = SistemaMisiones.estado_mision(SistemaMisiones.MISION_DESPERTAR) != "no_iniciada"
     _crear_interfaz()
 
     print("DON AURELIO LISTO")
@@ -138,9 +138,19 @@ func _terminar_dialogo() -> void:
     panel_dialogo.visible = false
     texto_interaccion.visible = heroe_cerca
 
-    if not mision_entregada:
-        mision_entregada = true
-        print("==============================")
-        print("NUEVA MISIÓN: EL DESPERTAR DE LAS LEYENDAS")
-        print("OBJETIVO: ENCUENTRA AL CADEJO BLANCO")
-        print("==============================")
+    var id_mision: String = SistemaMisiones.MISION_DESPERTAR
+    var estado_antes: String = SistemaMisiones.estado_mision(id_mision)
+    print("DON AURELIO | Misión antes: ", estado_antes)
+
+    if estado_antes == "no_iniciada":
+        var iniciada: bool = SistemaMisiones.iniciar_mision(id_mision)
+        print("DON AURELIO | Resultado iniciar_mision: ", iniciada)
+        if iniciada:
+            print("==============================")
+            print("NUEVA MISIÓN: EL DESPERTAR DE LAS LEYENDAS")
+            print("OBJETIVO: ENCUENTRA AL CADEJO BLANCO")
+            print("==============================")
+
+    var estado_despues: String = SistemaMisiones.estado_mision(id_mision)
+    mision_entregada = estado_despues != "no_iniciada"
+    print("DON AURELIO | Misión después: ", estado_despues)
