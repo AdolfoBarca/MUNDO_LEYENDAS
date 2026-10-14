@@ -98,7 +98,7 @@ bottom_radius = 0.09
 height = 0.35
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_j115u"]
-radius = 0.75
+radius = 1.2
 height = 2.6
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ikrdw"]
@@ -109,6 +109,8 @@ size = Vector3(2.8, 0.22, 0.06)
 
 [node name="CadejoNegro" type="CharacterBody3D" unique_id=843290446]
 script = ExtResource("1_ygjfv")
+distancia_ataque = 3.0
+recarga_acecho = 9999.0
 
 [node name="Modelo" type="Node3D" parent="." unique_id=230593846]
 
