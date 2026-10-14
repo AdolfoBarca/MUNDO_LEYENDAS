@@ -8,7 +8,6 @@
 
 config_version=5
 
-
 [application]
 
 config/name="MUNDO_LEYENDAS"
@@ -18,6 +17,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+HUDMisiones="*res://HUDMisiones.gd"
+SistemaMisiones="*res://SistemaMisiones.gd"
 DatosJugador="*res://DatosJugador.gd"
 HudCadejo="*res://HUDCadejo.gd"
 
