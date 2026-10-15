@@ -10,6 +10,18 @@ var misiones: Dictionary = {}
 func _ready() -> void:
 	cargar_misiones()
 
+func _process(_delta: float) -> void:
+	# Reconoce al Cadejo Blanco ya desbloqueado, incluso en partidas guardadas.
+	# También funciona cuando se desbloquea después de recibir la misión.
+	if estado_mision(MISION_DESPERTAR) != "activa":
+		return
+	if not DatosJugador.companero_esta_desbloqueado("cadejo_blanco"):
+		return
+	var heroe: Node = get_tree().get_first_node_in_group("heroe")
+	if heroe == null:
+		return
+	completar_mision(MISION_DESPERTAR, heroe)
+
 func iniciar_mision(id: String) -> bool:
 	if id != MISION_DESPERTAR or misiones.has(id):
 		return false
@@ -27,6 +39,7 @@ func completar_mision(id: String, heroe: Node) -> bool:
 		return false
 	if heroe == null or not heroe.has_method("recibir_experiencia"):
 		return false
+	# Cambiar el estado antes de otorgar XP impide recompensas repetidas.
 	misiones[id] = "completada"
 	guardar_misiones()
 	heroe.recibir_experiencia(50)

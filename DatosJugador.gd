@@ -35,8 +35,8 @@ var cartas_desbloqueadas: Dictionary = {}
 # Más adelante, los grados y las estrellas podrán ampliar este valor.
 # Cada tipo de guantes tiene sus ranuras independientes.
 # Los ejemplares idénticos todavía se agrupan por tipo en el inventario.
-var guantes_seleccionados: String = "guantes_aventurero"
-var guantes_puestos: String = "guantes_aventurero"
+var guantes_seleccionados: String = ""
+var guantes_puestos: String = ""
 var ranuras_por_guantes: Dictionary = {"guantes_aventurero": 1, "guantes_reforzados": 1}
 var cartas_por_guantes: Dictionary = {"guantes_aventurero": [""], "guantes_reforzados": [""]}
 # Atributos independientes por tipo. Preparados para refinado futuro.
@@ -382,9 +382,7 @@ func cargar_inventario_equipamiento() -> void:
 func _ready() -> void:
     cargar_progreso_cadejo_blanco()
     cargar_inventario_equipamiento()
-    # Solo se entrega el equipo inicial si todavía no existe.
-    if not tiene_objeto("guantes_aventurero"):
-        agregar_objeto_catalogo("guantes_aventurero", 1)
+    # Los guantes iniciales se obtendran explorando la Casa del Explorador.
     _inventario_cargado = true
     guardar_inventario_equipamiento()
     inventario_actualizado.emit()
