@@ -307,6 +307,44 @@ var inventario: Dictionary = {
 # EQUIPO INICIAL Y PRUEBA TEMPORAL
 # =========================================================
 # Guardado separado del progreso del héroe y del Cadejo Blanco.
+# =========================================================
+# COFRES DEL SENDERO DE LOS GUARDIANES - GUARDADO PERSISTENTE
+# =========================================================
+const ARCHIVO_COFRES: String = "user://cofres_abiertos.save"
+var cofres_abiertos: Dictionary = {}
+
+func cofre_esta_abierto(id_cofre: String) -> bool:
+    return bool(cofres_abiertos.get(id_cofre, false))
+
+func registrar_cofre_abierto(id_cofre: String) -> void:
+    if id_cofre.strip_edges().is_empty() or cofre_esta_abierto(id_cofre):
+        return
+    cofres_abiertos[id_cofre] = true
+    guardar_cofres()
+
+func guardar_cofres() -> void:
+    var archivo: FileAccess = FileAccess.open(ARCHIVO_COFRES, FileAccess.WRITE)
+    if archivo == null:
+        push_error("No se pudieron guardar los cofres: " + str(FileAccess.get_open_error()))
+        return
+    archivo.store_var(cofres_abiertos)
+    archivo.close()
+
+func cargar_cofres() -> void:
+    cofres_abiertos = {}
+    if not FileAccess.file_exists(ARCHIVO_COFRES):
+        return
+    var archivo: FileAccess = FileAccess.open(ARCHIVO_COFRES, FileAccess.READ)
+    if archivo == null:
+        push_error("No se pudieron cargar los cofres: " + str(FileAccess.get_open_error()))
+        return
+    var datos: Variant = archivo.get_var()
+    archivo.close()
+    if datos is Dictionary:
+        cofres_abiertos = datos.duplicate(true)
+    else:
+        push_warning("Archivo de cofres invalido; se usara un registro vacio.")
+
 const ARCHIVO_INVENTARIO: String = "user://inventario_equipamiento.save"
 var _inventario_cargado: bool = false
 func guardar_inventario_equipamiento() -> void:
@@ -382,6 +420,7 @@ func cargar_inventario_equipamiento() -> void:
 func _ready() -> void:
     cargar_progreso_cadejo_blanco()
     cargar_inventario_equipamiento()
+    cargar_cofres()
     # Los guantes iniciales se obtendran explorando la Casa del Explorador.
     _inventario_cargado = true
     guardar_inventario_equipamiento()
