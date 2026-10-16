@@ -21,14 +21,16 @@ var copas_por_arbol: Array[Dictionary] = []
 var heroe_referencia: Node3D
 var camara_referencia: Camera3D
 
-# Primer cofre interactivo. Los otros cinco siguen siendo decorativos.
-const ID_COFRE_PRUEBA: String = "sendero_cofre_entrada_01"
-const RECOMPENSA_COFRE: int = 15
+# Cinco cofres con IDs permanentes independientes.
 const DISTANCIA_ABRIR_COFRE: float = 2.8
-var cofre_prueba: Node3D
-var tapa_cofre_prueba: MeshInstance3D
-var indicador_cofre: Label3D
-var cofre_abierto_local: bool = false
+const CONFIG_COFRES: Array[Dictionary] = [
+	{"id": "sendero_cofre_entrada_01", "nombre": "Cofre del Explorador", "z": 105.0, "desvio": 6.5, "objeto": "fragmento_esencia", "cantidad": 15},
+	{"id": "sendero_cofre_bosque_02", "nombre": "Cofre del Bosque", "z": 30.0, "desvio": 10.0, "objeto": "fragmento_esencia", "cantidad": 25},
+	{"id": "sendero_cofre_cenizas_03", "nombre": "Cofre de las Cenizas", "z": -6.0, "desvio": -10.0, "objeto": "ceniza_encantada", "cantidad": 10},
+	{"id": "sendero_cofre_ancestral_04", "nombre": "Cofre Ancestral", "z": -42.0, "desvio": 10.0, "objeto": "ceniza_ancestral", "cantidad": 5},
+	{"id": "sendero_cofre_guardian_05", "nombre": "Cofre del Guardian", "z": -78.0, "desvio": -10.0, "objeto": "fragmento_esencia", "cantidad": 50}
+]
+var cofres: Array[Dictionary] = []
 
 func _ready() -> void:
 	rng.seed = semilla
@@ -38,8 +40,7 @@ func _ready() -> void:
 	crear_limites()
 	crear_vegetacion()
 	crear_claro_espiritual()
-	crear_pistas_secretas()
-	crear_cofre_interactivo()
+	crear_cofres_interactivos()
 	heroe_referencia = get_node_or_null("Heroe") as Node3D
 	camara_referencia = get_node_or_null("Camara") as Camera3D
 	print("SENDERO DE LOS GUARDIANES: escenario generado")
@@ -49,23 +50,27 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if not event.pressed or event.echo or event.keycode != KEY_E:
 		return
-	if get_tree().paused or not is_instance_valid(heroe_referencia) or not is_instance_valid(cofre_prueba):
+	if get_tree().paused or not is_instance_valid(heroe_referencia):
 		return
-	if heroe_referencia.global_position.distance_to(cofre_prueba.global_position) > DISTANCIA_ABRIR_COFRE:
+	for cofre in cofres:
+		var nodo: Node3D = cofre["nodo"]
+		if heroe_referencia.global_position.distance_to(nodo.global_position) > DISTANCIA_ABRIR_COFRE:
+			continue
+		var id_cofre: String = cofre["id"]
+		if DatosJugador.cofre_esta_abierto(id_cofre):
+			DatosJugador.avisar_evento("Este cofre ya fue abierto.", "info")
+		else:
+			# El inventario existente muestra y guarda la recompensa.
+			DatosJugador.agregar_objeto_catalogo(cofre["objeto"], cofre["cantidad"])
+			DatosJugador.registrar_cofre_abierto(id_cofre)
+			actualizar_apariencia_cofre(cofre)
+			DatosJugador.avisar_evento("¡Abriste el %s!" % cofre["nombre"], "exito")
+			print("COFRE ABIERTO: ", id_cofre, " | ", cofre["cantidad"], " ", cofre["objeto"])
+		get_viewport().set_input_as_handled()
 		return
-	if cofre_abierto_local or DatosJugador.cofre_esta_abierto(ID_COFRE_PRUEBA):
-		DatosJugador.avisar_evento("Este cofre ya fue abierto.", "info")
-		return
-	# El inventario existente se encarga de guardar y mostrar el objeto.
-	DatosJugador.agregar_objeto_catalogo("fragmento_esencia", RECOMPENSA_COFRE)
-	DatosJugador.registrar_cofre_abierto(ID_COFRE_PRUEBA)
-	cofre_abierto_local = true
-	actualizar_apariencia_cofre()
-	DatosJugador.avisar_evento("¡Encontraste un tesoro oculto en el Sendero!", "exito")
-	get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
-	actualizar_indicador_cofre()
+	actualizar_indicadores_cofres()
 	if not transparentar_copas:
 		return
 	if not is_instance_valid(heroe_referencia) or not is_instance_valid(camara_referencia):
@@ -203,8 +208,14 @@ func crear_vegetacion() -> void:
 			continue
 		if Vector2(x, z).distance_to(Vector2(centro_camino(-92.0), -92.0)) < 8.0:
 			continue
-		# Dejar despejado el primer tesoro, cerca de la entrada.
-		if Vector2(x, z).distance_to(Vector2(centro_camino(105.0) + 6.5, 105.0)) < 3.2:
+		# Despejar cada tesoro para evitar árboles encima de los cofres.
+		var cerca_de_cofre := false
+		for config in CONFIG_COFRES:
+			var posicion_cofre := Vector2(centro_camino(config["z"]) + config["desvio"], config["z"])
+			if Vector2(x, z).distance_to(posicion_cofre) < 3.2:
+				cerca_de_cofre = true
+				break
+		if cerca_de_cofre:
 			continue
 		crear_arbol(bosque, Vector3(x, 0, z), i)
 
@@ -289,68 +300,56 @@ func crear_claro_espiritual() -> void:
 	luz.position.y = 2.5
 	claro.add_child(luz)
 
-# Pistas decorativas. No otorgan objetos ni modifican inventario/guardados.
-func crear_pistas_secretas() -> void:
-	if not mostrar_tesoros_decorativos:
-		return
-	var pistas := Node3D.new()
-	pistas.name = "SecretosDecorativos"
-	add_child(pistas)
-	for i in range(5):
-		var z: float = -78.0 + float(i) * 36.0
-		var lado: float = -1.0 if i % 2 == 0 else 1.0
-		var x: float = centro_camino(z) + lado * 10.0
-		var base := Node3D.new()
-		base.name = "Pista_%02d" % i
-		base.position = Vector3(x, 0, z)
-		pistas.add_child(base)
-		caja_visual(base, "CofreCerradoDecorativo", Vector3(1.1, 0.65, 0.8), Vector3(0, 0.34, 0), materiales["cofre"])
-		caja_visual(base, "MarcaDorada", Vector3(1.13, 0.12, 0.15), Vector3(0, 0.58, 0.25), materiales["dorado"])
-		# La colision evita atravesar el cofre. No se puede abrir aun.
-		caja_fisica(base, "ColisionCofre", Vector3(1.1, 0.65, 0.8), Vector3(0, 0.34, 0))
-
-
 # =========================================================
-# PRIMER COFRE FUNCIONAL - SENDERO DE LOS GUARDIANES
+# CINCO COFRES INTERACTIVOS - GUARDADO INDEPENDIENTE
 # =========================================================
-func crear_cofre_interactivo() -> void:
-	cofre_prueba = Node3D.new()
-	cofre_prueba.name = "CofreInteractivoEntrada"
-	cofre_prueba.position = Vector3(centro_camino(105.0) + 6.5, 0.0, 105.0)
-	add_child(cofre_prueba)
+func crear_cofres_interactivos() -> void:
+	var grupo := Node3D.new()
+	grupo.name = "CofresDelSendero"
+	add_child(grupo)
+	for config in CONFIG_COFRES:
+		var cofre := Node3D.new()
+		cofre.name = config["id"]
+		cofre.position = Vector3(centro_camino(config["z"]) + config["desvio"], 0.0, config["z"])
+		grupo.add_child(cofre)
+		caja_visual(cofre, "BaseMadera", Vector3(1.3, 0.65, 0.9), Vector3(0, 0.35, 0), materiales["cofre"])
+		var tapa := caja_visual(cofre, "Tapa", Vector3(1.4, 0.22, 1.0), Vector3(0, 0.78, 0), materiales["tronco"])
+		caja_visual(cofre, "CerraduraDorada", Vector3(0.25, 0.28, 0.08), Vector3(0, 0.52, 0.49), materiales["dorado"])
+		caja_fisica(cofre, "ColisionCofre", Vector3(1.3, 0.65, 0.9), Vector3(0, 0.35, 0))
+		var indicador := Label3D.new()
+		indicador.name = "IndicadorInteraccion"
+		indicador.text = "[E] Abrir cofre"
+		indicador.font_size = 38
+		indicador.pixel_size = 0.012
+		indicador.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		indicador.position = Vector3(0, 1.65, 0)
+		indicador.visible = false
+		cofre.add_child(indicador)
+		var datos: Dictionary = config.duplicate()
+		datos["nodo"] = cofre
+		datos["tapa"] = tapa
+		datos["indicador"] = indicador
+		cofres.append(datos)
+		actualizar_apariencia_cofre(datos)
 
-	caja_visual(cofre_prueba, "BaseMadera", Vector3(1.3, 0.65, 0.9), Vector3(0, 0.35, 0), materiales["cofre"])
-	tapa_cofre_prueba = caja_visual(cofre_prueba, "Tapa", Vector3(1.4, 0.22, 1.0), Vector3(0, 0.78, 0), materiales["tronco"])
-	caja_visual(cofre_prueba, "CerraduraDorada", Vector3(0.25, 0.28, 0.08), Vector3(0, 0.52, 0.49), materiales["dorado"])
-	caja_fisica(cofre_prueba, "ColisionCofre", Vector3(1.3, 0.65, 0.9), Vector3(0, 0.35, 0))
-
-	indicador_cofre = Label3D.new()
-	indicador_cofre.name = "IndicadorInteraccion"
-	indicador_cofre.text = "[E] Abrir cofre"
-	indicador_cofre.font_size = 38
-	indicador_cofre.pixel_size = 0.012
-	indicador_cofre.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	indicador_cofre.position = Vector3(0, 1.65, 0)
-	indicador_cofre.visible = false
-	cofre_prueba.add_child(indicador_cofre)
-
-	cofre_abierto_local = DatosJugador.cofre_esta_abierto(ID_COFRE_PRUEBA)
-	actualizar_apariencia_cofre()
-
-func actualizar_apariencia_cofre() -> void:
-	if not is_instance_valid(tapa_cofre_prueba):
+func actualizar_apariencia_cofre(datos: Dictionary) -> void:
+	var tapa: MeshInstance3D = datos["tapa"]
+	if not is_instance_valid(tapa):
 		return
-	if cofre_abierto_local:
-		tapa_cofre_prueba.rotation.x = -0.95
-		tapa_cofre_prueba.position = Vector3(0, 1.03, -0.38)
+	if DatosJugador.cofre_esta_abierto(datos["id"]):
+		tapa.rotation.x = -0.95
+		tapa.position = Vector3(0, 1.03, -0.38)
 	else:
-		tapa_cofre_prueba.rotation.x = 0.0
-		tapa_cofre_prueba.position = Vector3(0, 0.78, 0)
+		tapa.rotation.x = 0.0
+		tapa.position = Vector3(0, 0.78, 0)
 
-func actualizar_indicador_cofre() -> void:
-	if not is_instance_valid(indicador_cofre) or not is_instance_valid(heroe_referencia):
+func actualizar_indicadores_cofres() -> void:
+	if not is_instance_valid(heroe_referencia):
 		return
-	var cerca: bool = heroe_referencia.global_position.distance_to(cofre_prueba.global_position) <= DISTANCIA_ABRIR_COFRE
-	indicador_cofre.visible = cerca and not get_tree().paused
-	if cerca:
-		indicador_cofre.text = "Cofre abierto" if cofre_abierto_local else "[E] Abrir cofre"
+	for datos in cofres:
+		var nodo: Node3D = datos["nodo"]
+		var indicador: Label3D = datos["indicador"]
+		var cerca := heroe_referencia.global_position.distance_to(nodo.global_position) <= DISTANCIA_ABRIR_COFRE
+		indicador.visible = cerca and not get_tree().paused
+		if cerca:
+			indicador.text = "Cofre abierto" if DatosJugador.cofre_esta_abierto(datos["id"]) else "[E] Abrir cofre"
