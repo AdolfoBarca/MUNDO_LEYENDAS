@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bcpdfes7rqkr7"]
 
 [ext_resource type="Script" uid="uid://c3vb236dt4jqd" path="res://SenderoGuardianes.gd" id="1_h2dps"]
+[ext_resource type="PackedScene" path="res://GuardianBosque.tscn" id="2_nru8k"]
 [ext_resource type="Script" uid="uid://ba1n56m0xsuw4" path="res://Heroe.gd" id="3_ddhu0"]
 [ext_resource type="Material" uid="uid://b4lcoj1mqmhph" path="res://MaterialPiel.tres" id="4_rtguw"]
 [ext_resource type="Script" uid="uid://cgi425hsbbcrs" path="res://Camara.gd" id="5_ddhu0"]
@@ -42,6 +43,8 @@ size = Vector3(1.5, 1.5, 2)
 
 [node name="SenderoGuardianes" type="Node3D" unique_id=1367337401]
 script = ExtResource("1_h2dps")
+
+[node name="GuardianBosque" parent="." unique_id=2103875609 instance=ExtResource("2_nru8k")]
 
 [node name="Terreno" type="MeshInstance3D" parent="." unique_id=1239315575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
@@ -203,3 +206,42 @@ offset_bottom = 610.0
 
 [node name="ListaObjetos" type="VBoxContainer" parent="HUDInventario/PanelObjetosObtenidos" unique_id=1081924402]
 layout_mode = 2
+
+[node name="Interfaz" type="CanvasLayer" parent="." unique_id=1090571086]
+
+[node name="BarraVida" type="ProgressBar" parent="Interfaz" unique_id=1790495520]
+offset_left = 30.0
+offset_top = 45.0
+offset_right = 280.0
+offset_bottom = 75.0
+value = 100.0
+
+[node name="TextoVida" type="Label" parent="Interfaz" unique_id=1563301312]
+offset_left = 30.0
+offset_top = 20.0
+offset_right = 70.0
+offset_bottom = 43.0
+
+[node name="TextoNivel" type="Label" parent="Interfaz" unique_id=1462809511]
+offset_left = 30.0
+offset_top = 85.0
+offset_right = 70.0
+offset_bottom = 108.0
+
+[node name="TextoExperiencia" type="Label" parent="Interfaz" unique_id=369806584]
+offset_left = 30.0
+offset_top = 110.0
+offset_right = 70.0
+offset_bottom = 133.0
+
+[node name="BarraExperiencia" type="ProgressBar" parent="Interfaz" unique_id=1188809409]
+offset_left = 30.0
+offset_top = 135.0
+offset_right = 280.0
+offset_bottom = 162.0
+
+[node name="TextoDerrota" type="Label" parent="Interfaz" unique_id=420766856]
+visible = false
+offset_right = 40.0
+offset_bottom = 23.0
+text = "HAS SIDO DERROTADO"

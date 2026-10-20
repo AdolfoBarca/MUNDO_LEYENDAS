@@ -1,0 +1,57 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://GuardianBosque.gd" id="1_guardian"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_guardian"]
+radius = 0.65
+height = 2.3
+
+[sub_resource type="StandardMaterial3D" id="Material_guardian"]
+albedo_color = Color(0.16, 0.39, 0.24, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_guardian"]
+radius = 0.65
+height = 2.3
+
+[node name="GuardianBosque" type="CharacterBody3D"]
+script = ExtResource("1_guardian")
+vida_maxima = 120
+ataque_base = 12
+velocidad_movimiento = 2.5
+distancia_deteccion = 6.0
+distancia_maxima_persecucion = 12.0
+distancia_ataque = 1.8
+tiempo_entre_ataques = 1.5
+tiempo_respawn = 10.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_guardian")
+surface_material_override/0 = SubResource("Material_guardian")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape_guardian")
+
+[node name="VidaLabel" type="Label3D" parent="."]
+position = Vector3(0, 2.0, 0)
+billboard = 1
+text = "120 / 120"
+
+[node name="ViewportVida" type="SubViewport" parent="."]
+size = Vector2i(180, 24)
+transparent_bg = true
+
+[node name="BarraVida" type="ProgressBar" parent="ViewportVida"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 120.0
+value = 120.0
+show_percentage = false
+
+[node name="BarraVida3D" type="Sprite3D" parent="."]
+position = Vector3(0, 2.2, 0)
+pixel_size = 0.005
+billboard = 1
