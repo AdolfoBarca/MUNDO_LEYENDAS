@@ -1,0 +1,56 @@
+﻿[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://AcechadorRaices.gd" id="1_acechador"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_acechador"]
+radius = 0.48
+height = 1.6
+
+[sub_resource type="StandardMaterial3D" id="Material_acechador"]
+albedo_color = Color(0.25, 0.15, 0.08, 1)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_acechador"]
+radius = 0.48
+height = 1.6
+
+[node name="AcechadorRaices" type="CharacterBody3D"]
+script = ExtResource("1_acechador")
+vida_maxima = 85
+ataque_base = 10
+velocidad_movimiento = 3.5
+distancia_deteccion = 7.0
+distancia_maxima_persecucion = 12.0
+distancia_ataque = 1.5
+tiempo_entre_ataques = 1.3
+tiempo_respawn = 12.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_acechador")
+surface_material_override/0 = SubResource("Material_acechador")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape_acechador")
+
+[node name="VidaLabel" type="Label3D" parent="."]
+position = Vector3(0, 1.25, 0)
+billboard = 1
+text = "85 / 85"
+
+[node name="ViewportVida" type="SubViewport" parent="."]
+size = Vector2i(180, 24)
+transparent_bg = true
+
+[node name="BarraVida" type="ProgressBar" parent="ViewportVida"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 85.0
+value = 85.0
+show_percentage = false
+
+[node name="BarraVida3D" type="Sprite3D" parent="."]
+position = Vector3(0, 1.45, 0)
+pixel_size = 0.005
+billboard = 1

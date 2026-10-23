@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://cgi425hsbbcrs" path="res://Camara.gd" id="5_ddhu0"]
 [ext_resource type="Material" uid="uid://c2y66k080fws6" path="res://MaterialPantalon.tres" id="5_nru8k"]
 [ext_resource type="Script" uid="uid://b0khvsy334yjx" path="res://HUDInventario.gd" id="6_rtguw"]
+[ext_resource type="PackedScene" path="res://AcechadorRaices.tscn" id="8_yp76p"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e5ioe"]
 albedo_color = Color(0.32156864, 0.45882353, 0.2784314, 1)
@@ -66,7 +67,7 @@ shadow_enabled = true
 environment = SubResource("Environment_j115u")
 
 [node name="Heroe" type="CharacterBody3D" parent="." unique_id=332470400 groups=["heroe"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 1, 105)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 1, 105)
 script = ExtResource("3_ddhu0")
 
 [node name="Cuerpo" type="MeshInstance3D" parent="Heroe" unique_id=561157297]
@@ -245,3 +246,6 @@ visible = false
 offset_right = 40.0
 offset_bottom = 23.0
 text = "HAS SIDO DERROTADO"
+
+[node name="AcechadorRaices" parent="." unique_id=2049945081 instance=ExtResource("8_yp76p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, -55)
