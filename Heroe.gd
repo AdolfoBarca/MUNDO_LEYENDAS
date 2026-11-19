@@ -1446,7 +1446,7 @@ func crear_efecto_visual_ceniza() -> void:
 
 # Cuando la captura esté implementada, cambiar a false.
 
-@export var permitir_cadejo_blanco_en_pruebas: bool = true
+@export var permitir_cadejo_blanco_en_pruebas: bool = false
 
 func _exit_tree() -> void:
 

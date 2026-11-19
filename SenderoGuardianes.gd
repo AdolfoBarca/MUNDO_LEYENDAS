@@ -40,6 +40,7 @@ func _ready() -> void:
 	crear_limites()
 	crear_vegetacion()
 	crear_claro_espiritual()
+	crear_encuentro_cadejo_blanco()
 	crear_cofres_interactivos()
 	heroe_referencia = get_node_or_null("Heroe") as Node3D
 	camara_referencia = get_node_or_null("Camara") as Camera3D
@@ -353,3 +354,16 @@ func actualizar_indicadores_cofres() -> void:
 		indicador.visible = cerca and not get_tree().paused
 		if cerca:
 			indicador.text = "Cofre abierto" if DatosJugador.cofre_esta_abierto(datos["id"]) else "[E] Abrir cofre"
+
+# Encuentro independiente del Cadejo Blanco compañero.
+func crear_encuentro_cadejo_blanco() -> void:
+	var escena: PackedScene = load("res://CadejoBlancoEntrenamiento.tscn")
+	if escena == null:
+		push_error("Falta res://CadejoBlancoEntrenamiento.tscn")
+		return
+	var encuentro: Node3D = escena.instantiate() as Node3D
+	if encuentro == null:
+		push_error("La escena de entrenamiento debe tener raiz Node3D")
+		return
+	add_child(encuentro)
+	encuentro.global_position = Vector3(centro_camino(-92.0), 0.0, -92.0)

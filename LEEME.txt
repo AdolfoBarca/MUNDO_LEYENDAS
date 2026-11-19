@@ -1,0 +1,4 @@
+Correccion de dialogo y posicion del Cadejo Blanco.
+Reemplaza SOLO CadejoBlancoEntrenamiento.gd y SenderoGuardianes.gd.
+No se reinician partidas ni se alteran las reglas de recuperacion del Cadejo.
+El guardado ya esta en la etapa que alcanzaste; para repetir el dialogo inicial haria falta reiniciar SOLO el estado de la mision de pacto de forma controlada.
